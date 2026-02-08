@@ -4,6 +4,7 @@ module test(
 );
 
     // Testing Git out
-    or n1(out,a,b,c);
+    or n1(c, a, b);
+    or n2(out, b, c);
     
 endmodule
