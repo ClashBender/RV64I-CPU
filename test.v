@@ -1,15 +1,14 @@
 module test(
     input a, b, c,
-    output out
+    output out1,
+    output out2
 );
   
     // Testing Git out
-<<<<<<< HEAD
-    or n1(out,a,b,c);
-
-=======
     or n1(c, a, b);
-    or n2(out, b, c);
+    or n2(out1, b, c);
+
+    // adding smething else-nikhilesh
+    and a1(out2, a, b);
     
->>>>>>> 4c678b08fc575bdac0c8d52a2b64b53f46d60c8c
 endmodule
