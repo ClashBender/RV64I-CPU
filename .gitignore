@@ -1,3 +1,7 @@
-# Ignoring output files
+# Ignoring iverilog output files
 .vcd
 .vvp
+
+# Ignoring latex compilation intermediary files
+.aux
+.log
