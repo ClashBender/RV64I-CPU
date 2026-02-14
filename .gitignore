@@ -3,5 +3,7 @@
 *.vvp
 
 # Ignoring latex compilation intermediary files
-*.aux
-*.log
+report/*
+!report/references.bib
+!report/report.pdf
+!report/report.tex

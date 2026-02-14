@@ -15,37 +15,53 @@
 
 
 \begin{document}
-\title{IPA Project Report \\ Implementation of a 64-bit RISC-V CPU}
+\title{IPA Project Report (Phase I) \\ Implementation of a 64-bit RISC-V CPU}
 
 \author{Ritvik Avula \\ Roll Number: 2024112019}
 
 % The paper headers
-\markboth{IPA Project Report}
-{RV64I CPU}
+\markboth{IPA Project Report}{RV64I CPU}
 
 \maketitle
 
 \begin{abstract}
-High-speed arithmetic units are the foundation of modern digital systems. This paper presents the design and implementation of an optimized 5-bit Carry Look-ahead Adder (CLA). The proposed architecture utilizes a static CMOS logic structure that saves on area and delay by using a modified topology that primarily uses NAND and NOR gates, over AND and OR. Furthermore, the design incorporates a Swing Restored Complementary Pass-transistor Logic (SR-CPL) XOR/XNOR gate, which significantly reduces transistor count while maintaining full voltage swing. We first performed transient analyses using NGspice and optimized transistor sizes, followed by physical layout generation in MAGIC. Finally, the logic functionality was validated through Verilog HDL and hardware implementation on a Boolean Board.
+  This report presents the design and implementation of a 64-bit RISC-V CPU as
+  part of the IPA Project Phase I. We provide a comprehensive overview of the
+  computational architecture, focusing on the datapath design, control unit
+  implementation, and instruction execution pipeline. The work encompasses the
+  development of essential arithmetic components, including adders and
+  multipliers, as well as the integration of memory subsystems and instruction
+  decoding logic. Our implementation demonstrates the practical challenges and
+  solutions in modern processor design, particularly regarding the trade-offs
+  between performance, area, and power consumption. The project serves as a
+  foundational study in digital system design and computer architecture
+  \cite{hennessy2011computer} principles.
 \end{abstract}
 
 
 \section{Introduction and Work}
 
-\IEEEPARstart{B}{inary} addition is the most fundamental arithmetic operation in modern digital systems, serving as the core of Arithmetic Logic Units (ALUs), microprocessors, and digital signal processing (DSP) architectures. As the demand for portable and high-performance computing devices increases, the design of adders that balance speed, power consumption, and area constraints has become a critical research objective. While simple topologies like the Ripple Carry Adder (RCA) offer compactness, they suffer from a very slow carry propagation path (which depends on previous carry to be calculated to process the next sum), making them unsuitable for high-speed applications as the number of bits increases. Conversely, adders such as the Carry Look-ahead Adder (CLA) perform carry and sum computations in parallel, though often at the cost of increased complexity and power dissipation \cite{nagendra1996}.
+\IEEEPARstart{B}{inary} addition is the most fundamental arithmetic operation in
+modern digital systems, serving as the core of Arithmetic Logic Units (ALUs),
+microprocessors, and digital signal processing (DSP) architectures. As the
+demand for portable and high-performance computing devices increases, the design
+of adders that balance speed, power consumption, and area constraints has become
+a critical research objective. While simple topologies like the Ripple Carry
+Adder (RCA) offer compactness, they suffer from a very slow carry propagation
+path (which depends on previous carry to be calculated to process the next sum),
+making them unsuitable for high-speed applications as the number of bits
+increases. Conversely, adders such as the Carry Look-ahead Adder (CLA) perform
+carry and sum computations in parallel, though often at the cost of increased
+complexity and power dissipation
 
-
-The primary bottleneck in conventional adder designs is the carry propagation network. To address this, high-speed architectures often utilize 4-bit or larger CLA blocks as fundamental building units to construct wider word-length adders, optimizing the critical path through parallel carry generation \cite{adder_comparisons}. However, the implementation of these blocks using only standard static CMOS logic can result in a high transistor count and significant capacitive loading in some stages of the circuit, particularly at the XOR gates. To mitigate these issues, researchers have explored alternative logic styles- like Manchester Carry Chains, Complementary Pass Transistor/Double Pass Transistor Logic style gates, Dynamic Logic gates, and the like. Such gates have been demonstrated to significantly reduce transistor count and delay in full adder cells compared to conventional CMOS implementations, particularly by optimizing the XOR/XNOR paths required for sum generation \cite{aguirre2005}. 
-
-In this project, we present the design and implementation of a 5-bit Carry Look-ahead Adder optimized for both area and delay. Deviating from standard topologies, our design employs a logic structure largely based on NAND and NOR gates to leverage their superior delay characteristics in Static CMOS logic. Furthermore, we incorporate an SR-CPL based XOR/XNOR gate with a carry-select output design to minimize the transistor count and reduce the propagation delay associated with sum computation. The proposed design is first designed in NGspice and sized to minimize delay, after which a comprehensive layout was designed in MAGIC VLSI. Post-layout simulations were then done to check the effects of parasitic capacitances between nodes and re-optimize. We end by implementing our adder logic in Verilog HDL and testing it out on a Xilinx FPGA.
+YES I CAN FINALLY WRITE LATEX LOCALLY ON VSCODE AAAAAAAAAAA
 
 \ifCLASSOPTIONcaptionsoff
   \newpage
 \fi
 
 \bibliographystyle{IEEEtran}
-\bibliography{references}
-\nocite{*}
+\bibliography{references.bib}
 
 \end{document}
 
