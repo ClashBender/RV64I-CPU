@@ -1,4 +1,5 @@
 `timescale 1ns/1ps
+`include "reg.v"
 
 module reg_tb;
 reg [63:0] registers [31:0];

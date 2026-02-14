@@ -1,4 +1,5 @@
 `timescale 1ns / 1ps
+`include "alu_ctrl.v"
 
 module ALU_Control_tb;
 

@@ -1,4 +1,5 @@
 `timescale 1ns/1ps
+`include "imm.v"
 
 module imm_tb;
     reg [31:0] instruction;
