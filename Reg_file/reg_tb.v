@@ -46,7 +46,7 @@ always @(posedge clk)
     clk_count = clk_count + 1;
 
 initial begin
-    file_handle = $fopen("registers.txt", "w");
+    file_handle = $fopen("register_file.txt", "w");
 
     if (file_handle == 0) begin
         $display("Error: Could not open file.");
@@ -63,7 +63,7 @@ initial begin
         $fdisplay(file_handle, "%h", uut.registers[i]);
     end
 
-    // Wriing CLock cycles to file
+    // Writing CLock cycles to file
     $fdisplay(file_handle, "%0d", clk_count);
 
     $fclose(file_handle);

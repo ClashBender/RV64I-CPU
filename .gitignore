@@ -7,3 +7,6 @@ report/*
 !report/references.bib
 !report/report.pdf
 !report/report.tex
+
+# Ignore build artifacts
+*.exe
