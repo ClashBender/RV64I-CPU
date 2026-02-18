@@ -8,3 +8,6 @@ report/*
 !report/report.pdf
 !report/report.tex
 !report/figures/
+
+# Ignore build artifacts
+*.exe

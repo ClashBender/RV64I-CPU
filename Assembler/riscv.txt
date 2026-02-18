@@ -1,0 +1,9 @@
+addi x1 x0 10
+addi x2 x0 20
+add x3 x1 x2
+sub x4 x3 x1
+and x5 x1 x2
+or x6 x1 x2
+ld x7 8(x1)
+sd x2 12(x3)
+beq x1 x2 16
