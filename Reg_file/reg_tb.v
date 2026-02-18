@@ -8,6 +8,7 @@ reg [4:0] read_reg1, read_reg2, write_reg;
 reg [63:0] write_data;
 reg reg_write_en;
 wire [63:0] read_data1, read_data2;
+
 // Instantiate
 reg_file uut (
     .clk(clk),
