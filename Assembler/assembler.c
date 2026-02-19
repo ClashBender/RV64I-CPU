@@ -148,7 +148,7 @@ int main(int argc, char **argv)
             if (line[i] == ',')
                 line[i] = ' ';
 
-        // To leave gaps in the code if needed, or to comment
+        // Ignore gaps and comments
         if ((strlen(line) == 0) || (line[0] == '#'))
             continue;
 
