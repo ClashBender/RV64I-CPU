@@ -5,7 +5,7 @@ module instmem(
     input  wire        clk,
     input  wire        reset,
     input  wire [63:0] addr,
-    output reg  [31:0] inst
+    output reg  [31:0] instr
 );
 
     reg [7:0]  byte_mem [0:`IMEM_SIZE-1];
@@ -29,9 +29,9 @@ module instmem(
     // output access logic
     always @(posedge clk) begin
         if (reset)
-            inst <= 32'b0;
+            instr <= 32'b0;
         else
-            inst <= inst_mem[addr[63:2]];   // word aligned access
+            instr <= inst_mem[addr[63:2]];   // word aligned access
     end
 
 endmodule

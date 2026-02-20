@@ -5,14 +5,14 @@ module inst_tb;
 
 reg clk, reset;
 reg [63:0] addr;
-wire [31:0] inst;
+wire [31:0] instr;
 
 // Instantiating
 instmem dut (
     .clk(clk),
     .reset(reset),
     .addr(addr),
-    .inst(inst)
+    .instr(instr)
 );
 
 always #5 clk = ~clk;
@@ -28,7 +28,7 @@ initial begin
     repeat (10) begin
         #10;
         $display("Time=%0t | PC=%0d | Instruction=%h",
-                  $time, addr, inst);
+                  $time, addr, instr);
 
         addr = addr + 4;   // incrementing PC
     end
