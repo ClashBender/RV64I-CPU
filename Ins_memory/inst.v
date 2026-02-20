@@ -4,7 +4,7 @@
 module instmem(
     input  wire        clk,
     input  wire        reset,
-    input  wire [63:0] pc_curr,
+    input  wire [63:0] addr,
     output reg  [31:0] inst
 );
 
@@ -18,10 +18,10 @@ module instmem(
 
         for (i = 0; i < `IMEM_SIZE/4; i = i + 1) begin
             inst_mem[i] = {
-                byte_mem[4*i+3],
-                byte_mem[4*i+2],
+                byte_mem[4*i],
                 byte_mem[4*i+1],
-                byte_mem[4*i]
+                byte_mem[4*i+2],
+                byte_mem[4*i+3]
             };
         end
     end
@@ -31,7 +31,7 @@ module instmem(
         if (reset)
             inst <= 32'b0;
         else
-            inst <= inst_mem[pc_curr[63:2]];   // word aligned access
+            inst <= inst_mem[addr[63:2]];   // word aligned access
     end
 
 endmodule
