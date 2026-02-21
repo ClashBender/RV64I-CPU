@@ -23,15 +23,10 @@ module data_mem (
         else read_data <= 64'b0;  // Default value when not reading
 
         if(reset == 1'b1) begin
-
-            
-
             for (i = 0; i < `MEM_SIZE; i = i + 1) begin
                 data[i] <= 8'b0;  // Clear memory on reset
             end
-
         end
-
     end
 
 

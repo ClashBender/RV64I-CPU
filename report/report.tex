@@ -117,7 +117,7 @@ instructions are 32 bits wide, and the current instruction is determined by the
 value of the PC, which as discussed earlier, is 64 bits wide.
 
 To function, the module first initializes its memory using instructions from the
-file ```instructions.txt```, which has a byte of instruction per line - meaning
+file \texttt{instructions.txt}, which has a byte of instruction per line - meaning
 four lines in conjunction make up one specific instruction completely. The
 module then reads instructions from instruction memory based on the current
 PC value and outputs the fetched 32-bit instruction to the Control Block,
@@ -233,83 +233,148 @@ extension to 64 bits. It handles multiple RISC-V instruction formats:
 \begin{itemize}
   \item \textbf{I-type:} 12-bit signed immediates (instructions: ADDI, LW, etc.)
   \item \textbf{S-type:} 12-bit signed immediates (instructions: SW)
-  \item \textbf{B-type:} 13-bit signed branch offsets (instructions: BEQ, BNE, etc.)
-  \item \textbf{U-type:} 20-bit immediates shifted left by 12 bits (instructions: LUI)
+  \item \textbf{B-type:} 13-bit signed branch offsets (instructions: BEQ)
   \item \textbf{J-type:} 21-bit signed jump offsets (instruction: JAL)
 \end{itemize}
 
 \subsection{Control Units}
 
-Two control modules coordinate instruction execution:
-
-\subsubsection{Main Control Unit (MCU)}
-Decodes the 7-bit opcode field of the instruction and generates high-level
-control signals such as:
+We've divided the control logic between two units to simplify hardware. These
+include:
 \begin{itemize}
-  \item ALU operation selection
-  \item Register file write enable
-  \item Data path multiplexing controls
-  \item Memory access controls (for future phases)
+  \item \textbf{Main Control Unit:} Decides between the type of instruction based on the opcode.
+  \item \textbf{ALU Control Unit:} Decides the kind of suboperation that the ALU
+        is supposed to do. For example, if it was an R type instruction, it would pick
+        from funct3, whereas if it was a B-type instruction, it would usually pick the
+        SUB function.
 \end{itemize}
 
+Below is the truth table for both of the control units - Table
+\ref{table:mcu_truth} shows the control signals for the main control unit, while
+Table \ref{table:alu_ctrl_truth} elaborates control signals for ALU control.
+
+\begin{table}[!ht]
+  \centering
+  \caption{ALU Control Unit Truth Table}
+  \begin{tabular}{|c|c|c|c|}
+    \hline
+    \textbf{ALUOp} & \textbf{funct3} & \textbf{inst[30]} & \textbf{ALU Control} \\
+    \hline
+    00             & XXX             & X                 & 0010 (ADD)           \\
+    01             & XXX             & X                 & 0110 (SUB)           \\
+    10             & 000             & 0                 & 0010 (ADD)           \\
+    10             & 000             & 1                 & 0110 (SUB)           \\
+    10             & 001             & X                 & 0001 (SLL)           \\
+    10             & 101             & 0                 & 0011 (SRL)           \\
+    10             & 101             & 1                 & 0100 (SRA)           \\
+    10             & 111             & X                 & 1100 (AND)           \\
+    10             & 110             & X                 & 1101 (OR)            \\
+    10             & 100             & X                 & 1110 (XOR)           \\
+    \hline
+  \end{tabular}
+  \label{table:alu_ctrl_truth}
+\end{table}
+
+\begin{table*}[!ht]
+  \centering
+  \caption{Main Control Unit Truth Table}
+  \begin{tabular}{|c|c|c|c|c|c|c|c|}
+    \hline
+    \textbf{Opcode} & \textbf{Instruction} & \textbf{ALUOp} & \textbf{RegWrite} & \textbf{MemWrite} & \textbf{MemRead} & \textbf{Branch} & \textbf{Jump} \\
+    \hline
+    0110011         & R-type               & 10             & 1                 & 0                 & 0                & 0               & 0             \\
+    0010011         & I-type (Arithmetic)  & 10             & 1                 & 0                 & 0                & 0               & 0             \\
+    0000011         & Load                 & 00             & 1                 & 0                 & 1                & 0               & 0             \\
+    0100011         & Store                & 00             & 0                 & 1                 & 0                & 0               & 0             \\
+    1100011         & Branch               & 01             & 0                 & 0                 & 0                & 1               & 0             \\
+    1101111         & Jal                  & 00             & 1                 & 0                 & 0                & 0               & 1             \\
+    1100111         & Jalr                 & 00             & 1                 & 0                 & 0                & 0               & 1             \\
+    \hline
+  \end{tabular}
+  \label{table:mcu_truth}
+\end{table*}
+
+\subsubsection{Main Control Unit (MCU)}
+
+\begin{description}[style=multiline, leftmargin=2cm, font=\bfseries]
+  \item[Inputs:] \texttt{[6:0] opcode}
+  \item[Outputs:] \texttt{branch, jump, MemToReg, MemWrite, ALUSrc, RegWrite,} \\
+        \texttt{[1:0] MemRead, ALUOp}
+\end{description}
+
+Decodes the 7-bit opcode field of the instruction and generates high-level
+control signals - mainly flags that determine which parts of the CPU must be
+enabled to perform their functions.
+
 \subsubsection{ALU Control Unit}
+
+\begin{description}[style=multiline, leftmargin=2cm, font=\bfseries]
+  \item[Inputs:] \texttt{[1:0] ALUOp, [6:0] funct7, [2:0] funct3, inst[30]}
+  \item[Outputs:] \texttt{reg [3:0] ALU\_ctrl}
+\end{description}
+
 Takes the 3-bit funct3 field and 7-bit funct7 field from the instruction and
 generates 4-bit ALU function codes. This implements the secondary decoding layer
 required for instructions with multiple variants.
 
+\subsection{Data Memory}
+
+\begin{description}[style=multiline, leftmargin=2cm, font=\bfseries]
+  \item[Inputs:] \texttt{clk, reset, mem\_write\_en, mem\_read\_en,} \\
+        \texttt{[63:0] address, write\_data}
+  \item[Outputs:] \texttt{[63:0] read\_data}
+\end{description}
+
+-------------------------------------------------------
+\\ Nikhilesh, finish writing this part of the report \\
+-------------------------------------------------------
+
 \section{Implementation Details}
 
-\subsection{Module Interfaces}
-
-All modules are designed with clear input/output interfaces to enable modular
-testing and integration:
-
+\subsection{Structure}
+Each module of the CPU has its own designated folder, containing:
 \begin{itemize}
-  \item Modules use consistent 64-bit data widths for operands and results
-  \item Control signals are clearly named to indicate their function
-  \item Clock and reset signals are provided to all sequential components
-  \item Each module can be independently tested with dedicated testbenches
+  \item The file containing the module itself (\texttt{<module>.v})
+  \item A testbench to validate each of the functions of that module (\texttt{<module>\_tb.v})
+  \item A bunch of intermediary files (\texttt{.vvp, .vcd}) that plot outputs
 \end{itemize}
 
-\subsection{Instruction Set Support}
+Apart from these folders, we also have a folder for testcases, written in
+assembly(\texttt{.asm files}) - however, \texttt{.txt} files also work.
 
-The Phase 1 implementation supports a subset of RV64I base instructions,
-including:
+\subsubsection{Assembler and its Features}
+We've also written a custom assembler in C - to translate RISC-V assembly code
+into machine code. It reads assembly instructions from \texttt{.asm} or
+\texttt{.txt} files, parses each instruction, and generates the corresponding
+32-bit machine code that can be executed by the CPU.
+
+The Assembler supports the following key features:
+
 \begin{itemize}
-  \item \textbf{Arithmetic:} ADD, ADDI, SUB, SUBI
-  \item \textbf{Logic:} AND, ANDI, OR, ORI, XOR, XORI
-  \item \textbf{Shift:} SLL, SLLI, SRL, SRLI, SRA, SRAI
-  \item \textbf{Load/Store:} LW, SW (basic support)
+  \item \textbf{Instruction Parsing:} Recognizes all R-type, I-type, S-type,
+        B-type, and J-type instructions implemented in the CPU
+  \item \textbf{Register Mapping:} Only the general naming convention (x0, x5,
+        etc.) works.
+  \item \textbf{Immediate Encoding:} Encodes immediate values and
+        performs sign extension where necessary
+  \item \textbf{Machine Code Generation:} Outputs 32-bit instruction encodings
+        in a format compatible with the instruction memory module
 \end{itemize}
 
-\section{Testing and Verification}
+The assembler operates in two passes:
 
-Each module includes comprehensive testbenches written in Verilog to verify
-correct operation:
+\begin{enumerate}
+  \item \textbf{First Pass:} Scans the assembly file to identify and record the
+        addresses of all labels
+  \item \textbf{Second Pass:} Translates each instruction to machine code, using
+        the label table to resolve branch and jump offsets
+\end{enumerate}
 
-\subsection{Individual Module Testing}
+The output is written to a text file where each line represents one byte of the
+instruction in hexadecimal format.
 
-Testbenches have been developed for each functional module:
-\begin{itemize}
-  \item \textbf{ALU Testbench:} Verifies all arithmetic operations, logic operations, and shift operations with various input patterns
-  \item \textbf{Adder64 Testbench:} Tests 64-bit addition and subtraction with edge cases including overflow scenarios
-  \item \textbf{Gate64 Testbench:} Validates bitwise logic operations
-  \item \textbf{Shift64 Testbench:} Confirms correct shifting behavior for all shift types
-  \item \textbf{Register File Testbench:} Tests read and write operations across all registers
-  \item \textbf{Immediate Generator Testbench:} Validates immediate extraction and sign extension for all instruction formats
-  \item \textbf{Control Unit Testbench:} Verifies opcode decoding and control signal generation
-  \item \textbf{PC Testbench:} Tests program counter increment and branch handling
-\end{itemize}
-
-\subsection{Test Coverage}
-
-The testbenches include:
-\begin{itemize}
-  \item Normal operation cases with representative inputs
-  \item Edge cases such as zero operands, maximum values, and boundary conditions
-  \item Negative operands to verify sign handling
-  \item Cross-module integration tests to ensure correct communication
-\end{itemize}
+And finally, the folder also contains a script that assembles the .asm files,
+runs them on the CPU and generates all the required output files.
 
 \subsection{Simulation and Results}
 
@@ -317,33 +382,6 @@ Simulations are performed using Icarus Verilog, with waveform outputs captured
 in .vcd format for detailed analysis of signal behavior. The
 simulation results confirm correct operation of all modules within their
 specified functional requirements.
-
-\section{Challenges and Solutions}
-
-\subsection{64-bit Arithmetic}
-Implementing correct carry propagation in the 64-bit adder required careful
-attention to the ripple-carry logic to ensure timing closure.
-
-\subsection{Instruction Format Decoding}
-The varying formats of RISC-V instructions necessitated a flexible immediate
-generator that correctly extracts and sign-extends immediates based on
-instruction type.
-
-\subsection{Control Signal Coordination}
-Synchronizing control signals across multiple modules required careful design of
-the control unit hierarchy to avoid hazards.
-
-\section{Future Work (Phase 2)}
-
-While Phase 1 establishes the foundational architecture, Phase 2 will extend the
-design with:
-\begin{itemize}
-  \item Data memory module for load/store operations
-  \item Pipeline stages (fetch, decode, execute, memory, writeback)
-  \item Hazard detection and forwarding logic
-  \item Branch prediction mechanisms
-  \item Additional instruction set extensions (multiply, divide, etc.)
-\end{itemize}
 
 \section{Conclusion}
 
