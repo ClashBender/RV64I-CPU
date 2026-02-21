@@ -1,6 +1,7 @@
 # Ignoring iverilog output files
 *.vcd
 *.vvp
+*_sim
 
 # Ignoring latex compilation intermediary files
 report/*
