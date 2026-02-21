@@ -1,0 +1,7 @@
+`include ""
+
+module decode(
+
+);
+
+endmodule
