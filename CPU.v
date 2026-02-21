@@ -13,7 +13,7 @@
 `include "shift64.v"
 module CPU(
     input clk,reset;
-    output
+    output 
 );
 wire pc_out,pc_in,ALUSrc,ALUOp,MemWrite,MemRead,MemToReg,reg_write_en;
 wire branch,zero,jump,res_and,res_or;
