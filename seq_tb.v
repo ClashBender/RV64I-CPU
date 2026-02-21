@@ -1,7 +1,8 @@
 `timescale 1ns/1ps
+`define IMEM_SIZE 4096        // About 4 KiB of memory, so 512 instructions max.
+`include "CPU.v"
 
-
-module cpu_tb ()
+module cpu_tb ();
 
     reg clk;
     reg reset;
@@ -10,7 +11,7 @@ module cpu_tb ()
     integer reg_file;
     integer data_file;
 
-    cpu uut (
+    CPU uut (
         .clk(clk), .reset(reset)
     );
 
@@ -36,7 +37,7 @@ module cpu_tb ()
         reset = 0;
     end
 
-    always @ #5 begin
+    always #5 begin
 
         $display("Instruction: %h | PC: %h | RegWrite: %b | MemRead: %b | MemWrite: %b | ALUOp: %b | ALUSrc: %b | MemToReg: %b",
                   uut.instr, uut.pc.pc_out, uut.mcu.RegWrite, uut.mcu.MemRead, uut.mcu.MemWrite, uut.mcu.ALUOp, uut.mcu.ALUSrc, uut.mcu.MemToReg);
@@ -48,7 +49,6 @@ module cpu_tb ()
             end
             
             // Write register values to file
-            integer reg_file;
             reg_file = $fopen("logs/register.txt", "w");
             for (i = 0; i < 32; i = i + 1) begin
                 $fwrite(reg_file, "x%0d: %h\n", i, uut.rf.registers[i]);
@@ -56,7 +56,6 @@ module cpu_tb ()
             $fclose(reg_file);
 
             // Write Data memory values to file
-            integer data_file;
             data_file = $fopen("logs/data_memory.txt", "w");
             for (i = 0; i < 32; i = i + 1) begin
                 $fwrite(data_file, "x%0d: %h\n", i, uut.A8.data[i]);

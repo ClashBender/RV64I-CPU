@@ -1,10 +1,17 @@
 `ifndef ALU_V
 `define ALU_V
 
-`include "adder64/adder64.v"
-`include "gate64/gate64.v"
-`include "shift64/shift64.v"
-`include "mux64/mux64.v"
+`ifdef STANDALONE_ALU
+  `include "adder64/adder64.v"
+  `include "gate64/gate64.v"
+  `include "shift64/shift64.v"
+  `include "mux64/mux64.v"
+`else
+  `include "ALU/adder64/adder64.v"
+  `include "ALU/gate64/gate64.v"
+  `include "ALU/shift64/shift64.v"
+  `include "ALU/mux64/mux64.v"
+`endif
 
 module alu_64_bit(
     input [63:0] rs1, rs2,

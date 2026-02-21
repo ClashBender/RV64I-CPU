@@ -1,4 +1,5 @@
 `timescale 1ns/1ps
+`define STANDALONE_ALU
 `include "alu.v"
 
 module alu_64_bit_tb;

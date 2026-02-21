@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 `ifndef CPU_V
-`define CPU
+`define CPU_V
 
 `include "ALU/alu.v"
 `include "PC/pc.v"
@@ -32,7 +32,7 @@ wire [63:0] rs1,rs2,imm_out,in2,alu_res,out,write_data,inc, incremented_mem_addr
 
 //fetch
 wire [3:0]ALU_ctrl;
-PC A1(
+pc A1(
     .clk(clk),
     .reset(reset),
     .pc_in(pc_in),
@@ -66,7 +66,7 @@ mcu A4(
     .ALUOp(ALUOp),
     .MemWrite(MemWrite),
     .MemToReg(MemToReg),
-    .RegWrite(reg_write_en) 
+    .RegWrite(reg_write_en), 
     .branch(branch),
     .jump(jump),
     .MemRead(MemRead));
@@ -81,7 +81,7 @@ mux64 A6(
     .sel(ALUSrc),
     .res(in2)
     );
-ALU_Control A8(
+ALU_Control A100(
     .ALUOp(ALUOp),
     .funct3(instr[14:12]),
     .funct7(instr[31:25]),
