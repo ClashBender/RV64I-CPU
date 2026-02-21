@@ -31,7 +31,11 @@ initial begin
     write_data = 64'hDEADBEEFCAFEBABE;
     reg_write_en = 1;
     #10 reg_write_en = 0;
-
+ // Test writing to register 10
+    write_reg = 10;
+    write_data = 64'hDEADBEEFCAFEBABE;
+    reg_write_en = 1;
+    #10 reg_write_en = 0;
     //  Test reading from register 5
     read_reg1 = 5;
     read_reg2 = 0; // Read from register 0 (should be zero)
@@ -47,7 +51,7 @@ always @(posedge clk)
     clk_count = clk_count + 1;
 
 initial begin
-    file_handle = $fopen("register_file.txt", "w");
+    file_handle = $fopen("registers.txt", "w");
 
     if (file_handle == 0) begin
         $display("Error: Could not open file.");

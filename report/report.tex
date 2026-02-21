@@ -104,7 +104,12 @@ The PC module manages instruction sequencing. It maintains the current program
 counter value and implements control logic to either increment to the next
 instruction or jump to a target address. The module is designed as a 64-bit
 register with a synchronous update mechanism triggered by the clock.
-
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=0.45\textwidth]{figures/PC.png}
+  \caption{PC module Simulation Results}
+  \label{fig:PC module Simulation}
+\end{figure}
 \subsection{Instruction Memory}
 
 \begin{description}[style=multiline, leftmargin=2cm, font=\bfseries]
@@ -122,7 +127,12 @@ four lines in conjunction make up one specific instruction completely. The
 module then reads instructions from instruction memory based on the current
 PC value and outputs the fetched 32-bit instruction to the Control Block,
 Register File, and the Immediate Generator.
-
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=0.45\textwidth]{figures/inst.png}
+  \caption{Instruction memory simulation results for given instructions.txt file}
+  \label{fig:Ins_mem module Simulation}
+\end{figure}
 \subsection{Register File}
 
 \begin{description}[style=multiline, leftmargin=2cm, font=\bfseries]
@@ -152,7 +162,12 @@ The register file that we implemented has the following features.
 
 To improve power efficiency, we implemented a 'lazy read' condition for x0 -
 allowing writing to x0 but clearing it to 0 only when it's being read.
-
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=0.45\textwidth]{figures/reg.png}
+  \caption{Checking contents of registers.txt for Regfile module}
+  \label{fig:Reg_file module Simulation}
+\end{figure}
 \subsection{Arithmetic Logic Unit (ALU)}
 
 \begin{description}[style=multiline, leftmargin=2cm, font=\bfseries]
@@ -236,7 +251,12 @@ extension to 64 bits. It handles multiple RISC-V instruction formats:
   \item \textbf{B-type:} 13-bit signed branch offsets (instructions: BEQ)
   \item \textbf{J-type:} 21-bit signed jump offsets (instruction: JAL)
 \end{itemize}
-
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=0.45\textwidth]{figures/imm.png}
+  \caption{Immgeneration Simulation}
+  \label{fig:Imm_gen Simulation}
+\end{figure}
 \subsection{Control Units}
 
 We've divided the control logic between two units to simplify hardware. These
@@ -305,7 +325,12 @@ Table \ref{table:alu_ctrl_truth} elaborates control signals for ALU control.
 Decodes the 7-bit opcode field of the instruction and generates high-level
 control signals - mainly flags that determine which parts of the CPU must be
 enabled to perform their functions.
-
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=0.45\textwidth]{figures/mcu.png}
+  \caption{MCU simulation results}
+  \label{fig:MCU module Simulation}
+\end{figure}
 \subsubsection{ALU Control Unit}
 
 \begin{description}[style=multiline, leftmargin=2cm, font=\bfseries]
@@ -317,7 +342,6 @@ Takes the 3-bit funct3 field and 7-bit funct7 field from the instruction and
 generates 4-bit ALU function codes. This implements the secondary decoding layer
 required for instructions with multiple variants.
 
-\subsection{Data Memory}
 
 \begin{description}[style=multiline, leftmargin=2cm, font=\bfseries]
   \item[Inputs:] \texttt{clk, reset, mem\_write\_en, mem\_read\_en,} \\
@@ -325,10 +349,18 @@ required for instructions with multiple variants.
   \item[Outputs:] \texttt{[63:0] read\_data}
 \end{description}
 
+
+\subsection{Data Memory}
+
 -------------------------------------------------------
 \\ Nikhilesh, finish writing this part of the report \\
 -------------------------------------------------------
-
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=0.45\textwidth]{figures/alu_ctrl.png}
+  \caption{ALU Control Test}
+  \label{fig:alu_ctrl Simulation}
+\end{figure}
 \section{Implementation Details}
 
 \subsection{Structure}
@@ -376,13 +408,18 @@ instruction in hexadecimal format.
 And finally, the folder also contains a script that assembles the .asm files,
 runs them on the CPU and generates all the required output files.
 
-\subsection{Simulation and Results}
 
-Simulations are performed using Icarus Verilog, with waveform outputs captured
-in .vcd format for detailed analysis of signal behavior. The
-simulation results confirm correct operation of all modules within their
-specified functional requirements.
 
+
+
+
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=0.45\textwidth]{figures/data_mem.png}
+  \caption{Data memory Test}
+  \label{fig:Data memory Simulation}
+\end{figure}
 \section{Conclusion}
 
 This project successfully demonstrates the design and implementation of a 64-bit
