@@ -1,3 +1,6 @@
+`ifndef ALU_CTRL_V
+`define ALU_CTRL_V
+
 module ALU_Control(
     input [1:0] ALUOp,
     input [6:0] funct7,
@@ -25,3 +28,5 @@ module ALU_Control(
     end
 
 endmodule
+
+`endif

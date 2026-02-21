@@ -1,3 +1,6 @@
+`ifndef DATA_MEM_V
+`define DATA_MEM_V
+
 `define MEM_SIZE 1024  // Size of data memory in bytes
 
 module data_mem (
@@ -31,3 +34,5 @@ module data_mem (
 
 
 endmodule
+
+`endif

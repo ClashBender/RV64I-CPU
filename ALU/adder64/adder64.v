@@ -1,3 +1,6 @@
+`ifndef ADDER64_V
+`define ADDER64_V
+
 module adder64(
     input [63:0] a, b,
     input adder_op, // Addition or subtraction?
@@ -46,3 +49,5 @@ module adder(
     or(cout, cin_and_xor, a_and_b); 
 
 endmodule
+
+`endif
