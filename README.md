@@ -1,6 +1,6 @@
 # RISC-V Processor Implementation
 
-All the testcases are in the folder "Testcases". To run, execute the following commands in Git Bash:
+All the testcases are in the folder "Testcases_Assembly". To run, execute the following commands in Git Bash:
 
 ```[bash]
    chmod +x script.sh 
