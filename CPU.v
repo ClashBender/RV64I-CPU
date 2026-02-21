@@ -1,4 +1,7 @@
 `timescale 1ns/1ps
+`ifndef CPU_V
+`define CPU
+
 `include "ALU/alu.v"
 `include "PC/pc.v"
 `include "Reg_file/reg.v"
@@ -152,3 +155,5 @@ mux64 A14(
     );
 
 endmodule
+
+`endif
