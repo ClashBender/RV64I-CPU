@@ -23,11 +23,11 @@ module cpu_tb ();
         $readmemh("instructions.txt", uut.A2.byte_mem);
 
         for (i = 0; i < `IMEM_SIZE/4; i = i + 1) begin
-            inst_mem[i] = {
-                byte_mem[4*i],
-                byte_mem[4*i+1],
-                byte_mem[4*i+2],
-                byte_mem[4*i+3]
+            uut.A2.inst_mem[i] = {
+                uut.A2.byte_mem[4*i],
+                uut.A2.byte_mem[4*i+1],
+                uut.A2.byte_mem[4*i+2],
+                uut.A2.byte_mem[4*i+3]
             };
         end
         
@@ -39,13 +39,13 @@ module cpu_tb ();
 
     always #5 begin
 
-        $display("Instruction: %h | PC: %h | RegWrite: %b | MemRead: %b | MemWrite: %b | ALUOp: %b | ALUSrc: %b | MemToReg: %b",
-                  uut.instr, uut.pc.pc_out, uut.mcu.RegWrite, uut.mcu.MemRead, uut.mcu.MemWrite, uut.mcu.ALUOp, uut.mcu.ALUSrc, uut.mcu.MemToReg);
+        // $display("Instruction: %h | PC: %h | RegWrite: %b | MemRead: %b | MemWrite: %b | ALUOp: %b | ALUSrc: %b | MemToReg: %b",
+        //           uut.instr, uut.A1.pc_out, uut.A3.RegWrite, uut.mcu.MemRead, uut.mcu.MemWrite, uut.mcu.ALUOp, uut.mcu.ALUSrc, uut.mcu.MemToReg);
        
        if(uut.instr == 32'h0) begin
             $display("Final Register State:");
             for (i = 0; i < 32; i = i + 1) begin
-                $display("x%0d: %h", i, uut.rf.registers[i]);
+                $display("x%0d: %h", i, uut.A3.registers[i]);
             end
             
             // Write register values to file
