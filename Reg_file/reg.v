@@ -1,3 +1,6 @@
+`ifndef REG_V
+`define REG_V
+
 `timescale 1ns/1ps
 
 module reg_file (
@@ -28,3 +31,5 @@ always @(posedge clk or posedge reset) begin
 end
 
 endmodule
+
+`endif

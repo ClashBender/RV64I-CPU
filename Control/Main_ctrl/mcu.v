@@ -1,3 +1,6 @@
+`ifndef MCU_V
+`define MCU_V
+
 module mcu(
     input [6:0] opcode,
     output reg branch,
@@ -47,3 +50,5 @@ module mcu(
     end
 
 endmodule
+
+`endif

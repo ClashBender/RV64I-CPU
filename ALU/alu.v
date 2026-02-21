@@ -1,3 +1,6 @@
+`ifndef ALU_V
+`define ALU_V
+
 `include "adder64/adder64.v"
 `include "gate64/gate64.v"
 `include "shift64/shift64.v"
@@ -102,3 +105,5 @@ module alu_64_bit(
     endgenerate
 
 endmodule
+
+`endif

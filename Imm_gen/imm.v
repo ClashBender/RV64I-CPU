@@ -1,3 +1,6 @@
+`ifndef IMM_V
+`define IMM_V
+
 `timescale 1ns/1ps
 
 module imm(
@@ -15,4 +18,6 @@ module imm(
             default: imm_out = 64'h0;
         endcase 
     end 
-endmodule 
+endmodule
+
+`endif 

@@ -1,3 +1,6 @@
+`ifndef GATE64_V
+`define GATE64_V
+
 module gate64(
     input [63:0] a, b, 
     output [63:0] res_and, res_or, res_xor
@@ -47,3 +50,5 @@ module or64(
     endgenerate
     
 endmodule
+
+`endif

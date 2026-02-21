@@ -1,3 +1,6 @@
+`ifndef PC_V
+`define PC_V
+
 module pc(
     input clk, reset,
     input [63:0] pc_in,
@@ -13,4 +16,6 @@ module pc(
     end
 
 endmodule
+
+`endif
  
