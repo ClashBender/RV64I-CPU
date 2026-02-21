@@ -30,7 +30,7 @@ module instmem(
     // end
 
     // output access logic
-    assign instr = (reset) ? inst_mem[addr[63:2]] : 32'b0;
+    assign instr = (reset) ? 32'b0 : inst_mem[addr[63:2]];
 
 endmodule
 
