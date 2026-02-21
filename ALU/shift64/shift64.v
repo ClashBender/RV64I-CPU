@@ -1,3 +1,6 @@
+`ifndef SHIFT64_V
+`define SHIFT64_V
+
 // `include "../mux64/mux64.v" 
 
 module barrel_shifter(
@@ -76,3 +79,4 @@ module barrel_shifter(
     endgenerate
 
 endmodule
+`endif

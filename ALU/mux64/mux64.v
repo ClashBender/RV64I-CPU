@@ -1,3 +1,6 @@
+`ifndef MUX64_V
+`define MUX64_V
+
 // (sel) ? a : b;
 module mux(
     input a, b, sel, 
@@ -52,3 +55,5 @@ module mux_3x8(
     mux64 mux3 (mid2b, mid2a, sel[2], res);
 
 endmodule
+
+`endif
