@@ -66,7 +66,7 @@ mcu A4(
     .RegWrite(reg_write_en) 
     .branch(branch),
     .jump(jump),
-    MemRead(MemRead));
+    .MemRead(MemRead));
 
 imm A5(
     .instruction(instr),
@@ -138,7 +138,7 @@ adder64 increment_by_4(
     .neg_flag()
     );
 // writing Back
-assign write_data = (MemToReg[0] == 0) ? alu_res : (MemToReg[1]==0) ? out : incremented_mem_addr; // if MemToReg = 00, write alu_res, if MemToReg = 01, write out, if MemToReg = 10, write incremented_mem_addr
+assign write_data = (MemToReg == 2'b01) ? out : (MemToReg==2'b10) ? incremented_mem_addr : alu_res; // if MemToReg = 00, write alu_res, if MemToReg = 01, write out, if MemToReg = 10, write incremented_mem_addr
 
 
 assign res_and = branch & zero;
