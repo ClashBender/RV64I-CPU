@@ -2,7 +2,7 @@
 `define IMEM_SIZE 4096        // About 4 KiB of memory, so 512 instructions max.
 `include "CPU.v"
 
-module cpu_tb ();
+module seq_tb ();
 
     reg clk;
     reg reset;
@@ -20,7 +20,9 @@ module cpu_tb ();
         reset = 1;
         
         // Load instructions into instruction memory
-        $readmemh("instructions.txt", uut.A2.byte_mem);
+        $readmemh("Testcases_Hex/simple.txt", uut.A2.byte_mem);
+
+        $display("Loaded instructions into instruction memory...");
 
         for (i = 0; i < `IMEM_SIZE/4; i = i + 1) begin
             uut.A2.inst_mem[i] = {
@@ -30,50 +32,60 @@ module cpu_tb ();
                 uut.A2.byte_mem[4*i+3]
             };
         end
+
+        $display("Instruction memory initialized from byte memory...");
         
 
 
         #10; // hold reset for 10ns
         reset = 0;
+
+        #30;
+        $display("Instruction: %h", uut.A2.inst_mem[10]);
     end
 
     always #5 begin
+        clk = ~clk; // 10ns clock period
+        $display("Time: %0t | PC: %h | Instr: %h | addr: %h | Write enable: %b", 
+             $time, uut.A1.pc_out, uut.A2.instr, uut.A8.address, uut.A4.MemWrite);
+    
+    
+        
 
+    
         // $display("Instruction: %h | PC: %h | RegWrite: %b | MemRead: %b | MemWrite: %b | ALUOp: %b | ALUSrc: %b | MemToReg: %b",
         //           uut.instr, uut.A1.pc_out, uut.A3.RegWrite, uut.mcu.MemRead, uut.mcu.MemWrite, uut.mcu.ALUOp, uut.mcu.ALUSrc, uut.mcu.MemToReg);
        
-       if(uut.instr == 32'h0) begin
-            $display("Final Register State:");
-            for (i = 0; i < 32; i = i + 1) begin
-                $display("x%0d: %h", i, uut.A3.registers[i]);
-            end
-            
-            // Write register values to file
+    
+        if(uut.A2.instr == 32'b0) begin
+            // Write register and data memory values to file
             reg_file = $fopen("logs/register.txt", "w");
-            for (i = 0; i < 32; i = i + 1) begin
-                $fwrite(reg_file, "x%0d: %h\n", i, uut.rf.registers[i]);
+            data_file = $fopen("logs/data_memory.txt", "w");
+
+            $display("Final Register State:");
+            for (i = 0; i < 1024; i = i + 1) begin
+                if(i<32) begin
+                    $display("x%0d: %h", i, uut.A3.registers[i]);
+                    $fwrite(reg_file, "x%0d: %h\n", i, uut.A3.registers[i]);
+                end
+
+                $fwrite(data_file, "%0d: %h\n", i, uut.A8.data[i]);
             end
             $fclose(reg_file);
-
-            // Write Data memory values to file
-            data_file = $fopen("logs/data_memory.txt", "w");
-            for (i = 0; i < 32; i = i + 1) begin
-                $fwrite(data_file, "x%0d: %h\n", i, uut.A8.data[i]);
-            end
             $fclose(data_file);
             $display("Logs written to logs/register.txt and logs/data_memory.txt");
 
-            reset =1'b1;
+            // reset =1'b1;
             $display("Simulation complete. Reset asserted.");
 
 
             $finish;
         end
-
-
-
-        clk = ~clk; // 10ns clock period
     end
+    
+
+        
+    
 
 
 

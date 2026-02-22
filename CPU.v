@@ -42,7 +42,6 @@ pc A1(
 
 //change the ports after u remove clock
 instmem A2(
-    .reset(reset),
     .addr(pc_out),
     .instr(instr)
     );
@@ -92,7 +91,7 @@ alu_64_bit A7(
     .rs1(rs1),
     .rs2(in2),
     .alu_ctrl(ALU_ctrl),
-    .res(alu_res),
+    .result(alu_res),
     .zero_flag(zero)  
     );
 data_mem A8(
@@ -115,14 +114,14 @@ data_mem A8(
 barrel_shifter A10(
     .a(imm_out),
     .b(64'b1),
-    .lr_flag(0),
-    .logic_flag(0),
+    .lr_flag(1'b0),
+    .logic_flag(1'b0),
     .result(inc)
     );
 adder64 increment_by_imm(
     .a(pc_out),
     .b(inc),
-    .adder_op(0),
+    .adder_op(1'b0),
     .result(branched_mem_addr),
     .cout(),
     .carry_flag(),
@@ -132,7 +131,7 @@ adder64 increment_by_imm(
 adder64 increment_by_4(
     .a(pc_out),
     .b(64'b100),
-    .adder_op(0),
+    .adder_op(1'b0),
     .result(incremented_mem_addr),
     .cout(),
     .carry_flag(),

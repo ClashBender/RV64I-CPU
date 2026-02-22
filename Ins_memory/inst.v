@@ -5,7 +5,6 @@
 `define IMEM_SIZE 4096        // About 4 KiB of memory, so 512 instructions max.
 
 module instmem(
-    input wire        reset,
     input wire [63:0] addr,
     output [31:0] instr
 );
@@ -30,7 +29,7 @@ module instmem(
     // end
 
     // output access logic
-    assign instr = (reset) ? 32'b0 : inst_mem[addr[63:2]];
+    assign instr = inst_mem[addr[63:2]];
 
 endmodule
 
