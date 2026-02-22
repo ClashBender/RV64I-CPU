@@ -135,9 +135,11 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    unsigned int code;
+
     while (fgets(line, sizeof(line), fin) != NULL)
     {
-        unsigned int code = 0;
+        code = 0;
         char instname[20];
 
         // Remove newline character
@@ -160,7 +162,7 @@ int main(int argc, char **argv)
         Instruction *inst = findInstruction(instname);
         if (inst == NULL)
         {
-            printf("Skipping unsupported instruction: %s\n", line);
+            printf("Skipping unsupported instruction: '%s' (full line: %s", instname, line);
             continue;
         }
 
@@ -225,11 +227,14 @@ int main(int argc, char **argv)
             continue;
         }
 
-        if (code != 0 || inst->type == 1)
-        { // code != 0 is a heuristic; J-type could be 0
+        if (code != 0 || inst->type == 1) // code != 0 is a heuristic; J-type could be 0
             dumpHexToFile(code, fout);
-        }
     }
+
+    // Add zeroes at the end of the .txt files
+    for (int i = 0; i < 4; i++)
+        dumpHexToFile(0, fout);
+
     fclose(fin);
     fclose(fout);
     printf("Hex output written to ");
