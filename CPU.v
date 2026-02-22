@@ -27,7 +27,6 @@ wire [31:0] instr;
 //These wires carry the data between different modules. For example, rs1 and rs2 are the outputs of the register file which are used as inputs to the ALU, imm_out is the output of the immediate generator which is also used as an input to the ALU, out is the output of the data memory which is used as an input to the mux for writing back to the register file, res is the output of the ALU which is used as an input to the data memory for load/store instructions and also used as an input to the mux for writing back to the register file for R-type instructions.
 wire [63:0] pc_out, pc_in, rs1,rs2,imm_out,in2,alu_res,out,write_data,inc, incremented_mem_addr, branched_mem_addr; 
 
-
 // res is o/p of alu,out is o/p of data mem , in2 is o/p od 1st mux , inc is i/p to adder
 
 //fetch

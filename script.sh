@@ -12,9 +12,9 @@ gcc "$ASM_SRC" -o "$ASM_EXE"
 ./"$ASM_EXE" "$ASM_INPUT" -o "$INST_OUT"
 
 # # Step 2: Compile and run Verilog simulation
-# echo "[2/2] Running CPU simulation..."
-# iverilog -o seq.vvp seq_tb.v
-# vvp seq.vvp
+echo "[2/2] Running CPU simulation..."
+iverilog -o seq.vvp seq_tb.v
+vvp seq.vvp
 
 echo ""
 echo "Script executed successfully."
