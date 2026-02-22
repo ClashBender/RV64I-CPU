@@ -343,18 +343,20 @@ generates 4-bit ALU function codes. This implements the secondary decoding layer
 required for instructions with multiple variants.
 
 
+\subsection{Data Memory}
 \begin{description}[style=multiline, leftmargin=2cm, font=\bfseries]
   \item[Inputs:] \texttt{clk, reset, mem\_write\_en, mem\_read\_en,} \\
         \texttt{[63:0] address, write\_data}
   \item[Outputs:] \texttt{[63:0] read\_data}
 \end{description}
-
-
-\subsection{Data Memory}
-
--------------------------------------------------------
-\\ Nikhilesh, finish writing this part of the report \\
--------------------------------------------------------
+The Data Memory Module simulates a 1024-Byte memory space for load and store 
+operations. It supports 64-bit wide data access and is byte-addressable. 
+Upon initialization and on assertion of reset, its contents are set to zero.
+ for simplicity data writing takes just one clock cycle, and data reading is
+combinational - meaning that the output data is available immediately after 
+the address is provided, without waiting for a clock edge. This was 
+necessary to ensure that each instruction executes in a single cycle, as 
+required by the project document. The module also includes control signals to enable or disable memory read and write operations, ensuring proper synchronization with the CPU's instruction execution cycle.
 \begin{figure}[!ht]
   \centering
   \includegraphics[width=0.45\textwidth]{figures/alu_ctrl.png}
@@ -427,6 +429,7 @@ RISC-V processor core. The modular architecture allows for clear separation of
 concerns and facilitates future extensions. All modules have been thoroughly
 tested and verified to operate correctly. The Phase 1 design provides a solid
 foundation for implementing a pipelined processor in subsequent phases.
+
 
 \ifCLASSOPTIONcaptionsoff
   \newpage

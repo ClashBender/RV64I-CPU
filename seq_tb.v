@@ -69,11 +69,11 @@ module seq_tb ();
                 if(i<32) begin
                     //$display("x%0d: %h", i, uut.A3.registers[i]);
                     $fwrite(reg_file, "x%0d: %h\n", i, uut.A3.registers[i]);
-                    $fwrite(reg_file2, "x%0d: %h\n", i, uut.A3.registers[i]);
+                    $fwrite(reg_file2, "%h\n", uut.A3.registers[i]);
                 end
                 else if(i==32) begin
                     $fwrite(reg_file, "Clock Cycle: %d\n", cycle_count);
-                    $fwrite(reg_file2, "Clock Cycle: %d\n", cycle_count);
+                    $fwrite(reg_file2,"%0d", cycle_count);
                 end
 
                 $fwrite(data_file, "%0d: %h\n", i, uut.A8.data[i]);
@@ -87,7 +87,7 @@ module seq_tb ();
             //$display("Logs written to logs/register.txt and logs/data_memory.txt");
 
             reset =1'b1;
-            $display("Simulation complete. register.txt produced. Reset asserted.\n");
+            $display("Simulation complete. register_file.txt produced. Reset asserted.\n");
 
 
             $finish;
