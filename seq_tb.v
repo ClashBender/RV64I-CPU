@@ -22,7 +22,8 @@ module seq_tb ();
         reset = 1;
         
         // Load instructions into instruction memory
-        $readmemh("Testcases_Hex/simple.txt", uut.A2.byte_mem);
+        //$readmemh("Testcases_Hex/simple.txt", uut.A2.byte_mem);
+        $readmemh("instructions.txt", uut.A2.byte_mem);
 
         $display("\nLoaded instructions into instruction memory\n");
 
@@ -46,9 +47,9 @@ module seq_tb ();
 
     always #5 begin
         clk = ~clk; // 10ns clock period
-        if(clk == 1'b1)
+        if(clk == 1'b1) begin
             cycle_count = cycle_count + 1;
-
+        end 
         //for debugging
         // $display("Time: %0t | PC: %h | Instr: %h | addr: %h | Data_mem_write: %b | RegWrite: %b | MemRead: %b",
         //      $time, uut.A1.pc_out, uut.A2.instr, uut.A8.address, uut.A4.MemWrite, uut.A3.reg_write_en, uut.A4.MemRead);
@@ -70,10 +71,10 @@ module seq_tb ();
                     $fwrite(reg_file, "x%0d: %h\n", i, uut.A3.registers[i]);
                     $fwrite(reg_file2, "x%0d: %h\n", i, uut.A3.registers[i]);
                 end
-                else if(i==32)
+                else if(i==32) begin
                     $fwrite(reg_file, "Clock Cycle: %d\n", cycle_count);
                     $fwrite(reg_file2, "Clock Cycle: %d\n", cycle_count);
-                
+                end
 
                 $fwrite(data_file, "%0d: %h\n", i, uut.A8.data[i]);
             end
