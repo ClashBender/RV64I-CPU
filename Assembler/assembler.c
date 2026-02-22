@@ -232,8 +232,7 @@ int main(int argc, char **argv)
     }
 
     // Add zeroes at the end of the .txt files
-    for (int i = 0; i < 4; i++)
-        dumpHexToFile(0, fout);
+    dumpHexToFile(0, fout);
 
     fclose(fin);
     fclose(fout);
