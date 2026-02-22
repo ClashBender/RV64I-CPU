@@ -22,7 +22,8 @@ module seq_tb ();
         reset = 1;
         
         // Load instructions into instruction memory
-        $readmemh("instructions.txt", uut.A2.byte_mem);
+        $readmemh("Testcases_Hex/simpler.txt", uut.A2.byte_mem);
+        //$readmemh("instructions.txt", uut.A2.byte_mem);
 
         $display("\nLoaded instructions into instruction memory\n");
 
@@ -74,8 +75,6 @@ module seq_tb ();
                 $fwrite(data_file, "%d\n", uut.A8.data[i]);
             end
 
-            $fwrite(reg_file, "%d\n", cycle_count);
-            $fwrite(reg_file2, "%d\n", cycle_count);
 
             $fclose(reg_file);
             $fclose(reg_file2);
