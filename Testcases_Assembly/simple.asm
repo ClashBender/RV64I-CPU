@@ -11,5 +11,5 @@ or x11, x10, x3         # x11 = 5
 # store          
 sd x11 4(x0)            
 sd x11 1016(x0)            
-
-# 
+# load
+ld x12 4(x0)             # x12 = 5
