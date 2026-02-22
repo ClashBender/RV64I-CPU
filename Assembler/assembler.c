@@ -139,7 +139,7 @@ int main(int argc, char **argv)
 
     while (fgets(line, sizeof(line), fin) != NULL)
     {
-        code = 0;
+        code = -1;
         char instname[20];
 
         // Remove newline character
@@ -227,7 +227,7 @@ int main(int argc, char **argv)
             continue;
         }
 
-        if (code != 0 || inst->type == 1) // code != 0 is a heuristic; J-type could be 0
+        if (code != -1)
             dumpHexToFile(code, fout);
     }
 

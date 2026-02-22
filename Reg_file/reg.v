@@ -17,8 +17,8 @@ module reg_file (
 reg [63:0] registers [31:0];
 
 // read operation
-assign read_data1 = (read_reg1) ? registers[read_reg1] : 64'b0;
-assign read_data2 = (read_reg2) ? registers[read_reg2] : 64'b0;
+assign read_data1 = registers[read_reg1];
+assign read_data2 = registers[read_reg2];
 
 // write operation
 always @(posedge clk or posedge reset) begin
@@ -26,7 +26,7 @@ always @(posedge clk or posedge reset) begin
         for (integer i = 0; i < 32; i = i + 1) 
             registers[i] <= 64'b0;
     end 
-    else if (reg_write_en) 
+    else if (reg_write_en && (write_reg != 0)) 
         registers[write_reg] <= write_data;
 end
 

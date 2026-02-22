@@ -29,8 +29,7 @@ wire [63:0] pc_out, pc_in, rs1,rs2,imm_out,in2,alu_res,out,write_data,inc, incre
 
 // res is o/p of alu,out is o/p of data mem , in2 is o/p od 1st mux , inc is i/p to adder
 
-//fetch
-wire [3:0]ALU_ctrl;
+wire [3:0] ALU_ctrl;
 pc A1(
     .clk(clk),
     .reset(reset),
@@ -38,8 +37,6 @@ pc A1(
     .pc_out(pc_out)
 );
 
-
-//change the ports after u remove clock
 instmem A2(
     .addr(pc_out),
     .instr(instr)
@@ -72,12 +69,14 @@ imm A5(
     .instruction(instr),
     .imm_out(imm_out)
     );
+
 mux64 A6(
     .a(imm_out),
     .b(rs2),
     .sel(ALUSrc),
     .res(in2)
     );
+
 ALU_Control A100(
     .ALUOp(ALUOp),
     .funct3(instr[14:12]),
@@ -85,7 +84,7 @@ ALU_Control A100(
     .inst5(instr[5]),
     .ALU_ctrl(ALU_ctrl)
     );
-    // why seperate??
+
 alu_64_bit A7(
     .rs1(rs1),
     .rs2(in2),
@@ -93,6 +92,7 @@ alu_64_bit A7(
     .result(alu_res),
     .zero_flag(zero)  
     );
+
 data_mem A8(
     .clk(clk),
     .reset(reset),
@@ -110,16 +110,19 @@ data_mem A8(
 //     .res(write_data)
 //     );
 
-barrel_shifter A10(
-    .a(imm_out),
-    .b(64'b1),
-    .lr_flag(1'b0),
-    .logic_flag(1'b0),
-    .result(inc)
-    );
+
+// Did not need this module, since we alr implemented the shift in imm.v
+// barrel_shifter A10(
+//     .a(imm_out),
+//     .b(64'b0),         
+//     .lr_flag(1'b0),
+//     .logic_flag(1'b0),
+//     .result(inc)
+//     );
+
 adder64 increment_by_imm(
     .a(pc_out),
-    .b(inc),
+    .b(imm_out),
     .adder_op(1'b0),
     .result(branched_mem_addr),
     .cout(),
