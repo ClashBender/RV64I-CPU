@@ -22,7 +22,6 @@ module seq_tb ();
         reset = 1;
         
         // Load instructions into instruction memory
-        //$readmemh("Testcases_Hex/simple.txt", uut.A2.byte_mem);
         $readmemh("instructions.txt", uut.A2.byte_mem);
 
         $display("\nLoaded instructions into instruction memory\n");
@@ -37,9 +36,7 @@ module seq_tb ();
         end
 
         $display("Starting program\n");
-        
-
-
+    
         #10; // hold reset for 10ns
         reset = 0;
 
@@ -54,8 +51,6 @@ module seq_tb ();
         // $display("Time: %0t | PC: %h | Instr: %h | addr: %h | Data_mem_write: %b | RegWrite: %b | MemRead: %b",
         //      $time, uut.A1.pc_out, uut.A2.instr, uut.A8.address, uut.A4.MemWrite, uut.A3.reg_write_en, uut.A4.MemRead);
     
-    
-        
         if(uut.A2.instr == 32'b0) begin
             
             // Write register and data memory values to file
@@ -67,17 +62,18 @@ module seq_tb ();
             //$display("Final Register State:");
             for (i = 0; i < 1024; i = i + 1) begin
                 if(i<32) begin
-                    //$display("x%0d: %h", i, uut.A3.registers[i]);
-                    $fwrite(reg_file, "x%0d: %h\n", i, uut.A3.registers[i]);
-                    $fwrite(reg_file2, "x%0d: %h\n", i, uut.A3.registers[i]);
-                end
-                else if(i==32) begin
-                    $fwrite(reg_file, "Clock Cycle: %d\n", cycle_count);
-                    $fwrite(reg_file2, "Clock Cycle: %d\n", cycle_count);
+                    // //$display("x%0d: %h", i, uut.A3.registers[i]);
+                    // $fwrite(reg_file, "x%0d: %h\n", i, uut.A3.registers[i]);
+                    // $fwrite(reg_file2, "x%0d: %h\n", i, uut.A3.registers[i]);
+                    $fwrite(reg_file, "%h\n", uut.A3.registers[i]);
+                    $fwrite(reg_file2, "%h\n", uut.A3.registers[i]);
                 end
 
-                $fwrite(data_file, "%0d: %h\n", i, uut.A8.data[i]);
+                $fwrite(data_file, "%d\n", uut.A8.data[i]);
             end
+
+            $fwrite(reg_file, "%d\n", cycle_count);
+            $fwrite(reg_file2, "%d\n", cycle_count);
 
             $fclose(reg_file);
             $fclose(reg_file2);
@@ -88,16 +84,8 @@ module seq_tb ();
 
             reset =1'b1;
             $display("Simulation complete. register.txt produced. Reset asserted.\n");
-
-
             $finish;
         end
     end
     
-
-        
-    
-
-
-
 endmodule
