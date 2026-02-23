@@ -1,10 +1,10 @@
-#!/bin/bash
+# !/bin/bash
 set -e  # Exit on any error
 
 ASM_SRC="Assembler/assembler.c" # where the assembler is
 ASM_EXE="Assembler/asm" # where asm.exe is
-ASM_INPUT="${1:-$(ls Testcases_Assembly/*.asm Testcases_Assembly/*.txt 2>/dev/null | head -1)}" # Take both .asm and .txt inputs from Testcases/
-INST_OUT="testcases_hex/$(basename "${ASM_INPUT%.*}").txt" # Output file in testcases_hex with same name as input but .txt extension
+ASM_INPUT="${1:-$(ls Testcases/*.asm 2>/dev/null | head -1)}" # Take both .asm and .txt inputs from Testcases/
+INST_OUT="Testcases/$(basename "${ASM_INPUT%.*}").txt" # Output file in testcases_hex with same name as input but .txt extension
 
 # Step 1: Compile the assembler
 echo "[1/2] Assembling to machine code..."
