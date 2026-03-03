@@ -1,17 +1,17 @@
 `timescale 1ns/1ps
-`ifndef CPU_V
-`define CPU_V
+`ifndef CPU_SEQ_V
+`define CPU_SEQ_V
 
-`include "ALU/alu.v"
-`include "PC/pc.v"
-`include "Reg_file/reg.v"
-`include "Ins_memory/inst.v"
-`include "Imm_gen/imm.v"
-`include "Control/ALU_ctrl/alu_ctrl.v"
-`include "Control/Main_ctrl/mcu.v"
-`include "Data_memory/data_mem.v" 
+`include "Modules/ALU/alu.v"
+`include "Modules/PC/pc.v"
+`include "Modules/Reg_file/reg.v"
+`include "Modules/Ins_memory/inst.v"
+`include "Modules/Imm_gen/imm.v"
+`include "Modules/Control/ALU_ctrl/alu_ctrl.v"
+`include "Modules/Control/Main_ctrl/mcu.v"
+`include "Modules/Data_memory/data_mem.v" 
 
-module CPU(
+module CPU_seq(
     input clk,
     input reset
 );

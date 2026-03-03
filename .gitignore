@@ -2,6 +2,7 @@
 *.vcd
 *.vvp
 *_sim
+*.out
 
 # Ignoring latex compilation intermediary files
 report/*
@@ -12,3 +13,6 @@ report/*
 
 # Ignore build artifacts
 *.exe
+
+# Ignore register and memory logs
+logs/
