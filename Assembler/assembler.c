@@ -158,7 +158,7 @@ int main(int argc, char **argv)
         if (sscanf(line, "%s", instname) != 1)
             continue;
 
-        // Look up instruction in table
+        // Instruction lookup
         Instruction *inst = findInstruction(instname);
         if (inst == NULL)
         {
@@ -166,7 +166,7 @@ int main(int argc, char **argv)
             continue;
         }
 
-        // Parse operands and encode based on instruction type
+        // Encoding
         switch (inst->type)
         {
         case 0: // R-type: <funct> rd rs1 rs2
@@ -180,14 +180,14 @@ int main(int argc, char **argv)
             break;
 
         case 1: // I-type: <funct> rd rs1 imm OR <funct> rd imm(rs1)
-            // Try format: "addi rd rs1 imm"
+            // format 1: "addi rd rs1 imm"
             if (sscanf(line, "%s %s %s %d", instname, rdstr, rs1str, &imm) == 4)
             {
                 rd = regNum(rdstr);
                 rs1 = regNum(rs1str);
                 code = encodeI(imm, rs1, inst->funct3, rd, inst->opcode);
             }
-            // Try format: "ld rd imm(rs1)"
+            // format 2: "ld rd imm(rs1)"
             else if (sscanf(line, "%s %s %d(%[^)])", instname, rdstr, &imm, rs1str) == 4)
             {
                 rd = regNum(rdstr);
@@ -232,7 +232,8 @@ int main(int argc, char **argv)
     }
 
     // Add zeroes at the end of the .txt files
-    dumpHexToFile(0, fout);
+    for (int i = 0; i < 4; i++)
+        dumpHexToFile(0, fout);
 
     fclose(fin);
     fclose(fout);

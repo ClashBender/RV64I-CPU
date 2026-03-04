@@ -1,6 +1,6 @@
-`include "PC/pc.v"
-`include "Ins_memory/inst.v"
-`include "ALU/adder64/adder64.v"
+`include "Modules/PC/pc.v"
+`include "Modules/Ins_memory/inst.v"
+`include "Modules/ALU/adder64/adder64.v"
 
 module fetch(
     input clk, reset,
