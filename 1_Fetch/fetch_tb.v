@@ -3,18 +3,21 @@
 
 module fetch_tb();
 
-    reg clk, reset;
-    reg [63:0] pc_plus_imm;
+    reg clk, enable, reset;
     reg PCSrc;
+    reg [63:0] pc_plus_imm;
     wire [63:0] pc_out;
+    wire [63:0] pc_plus_4;
     wire [31:0] instr;
 
     fetch uut(
         .clk(clk),
+        .enable(enable),
         .reset(reset),
         .pc_plus_imm(pc_plus_imm),
         .PCSrc(PCSrc),
         .pc_out(pc_out),
+        .pc_plus_4(pc_plus_4),
         .instr(instr)
     );
 
@@ -26,7 +29,7 @@ module fetch_tb();
         integer i;
         begin
             // Read byte data from instructions.txt
-            $readmemh("instructions.txt", byte_mem);
+            $readmemh("../Testcases/simple.txt", byte_mem);
             
             // Load bytes into instruction memory (4 bytes per instruction)
             for (i = 0; i < 1024; i = i + 1) begin
@@ -54,41 +57,60 @@ module fetch_tb();
     endtask
 
     initial begin
-        $display("=== Fetch Module Testbench with Instruction Memory ===");
+        $display("=== Fetch Module Testbench ===");
         
         // Initialize signals
         clk = 0;
+        enable = 0;
         reset = 1;
-        #10;
+        PCSrc = 0;
+        pc_plus_imm = 64'h0;
         
         // Initialize instruction memory
         init_instruction_memory();
+
+        // Release reset and allow normal PC updates
         #10;
         reset = 0;
-        PCSrc = 0;
-        pc_plus_imm = 64'h0;
-        #5;
+        
+        // Enable the module
+        enable = 1;
 
-        $display("PC = 0x%016h, Instruction = 0x%08h", pc_out, instr);
-        #10;
-        $display("PC = 0x%016h, Instruction = 0x%08h", pc_out, instr);
-        #10;
-        $display("PC = 0x%016h, Instruction = 0x%08h", pc_out, instr);
-        #10;
-        $display("PC = 0x%016h, Instruction = 0x%08h", pc_out, instr);
-        #10;
-        $display("PC = 0x%016h, Instruction = 0x%08h", pc_out, instr);
-        #10;
-        $display("PC = 0x%016h, Instruction = 0x%08h", pc_out, instr);
-        #10;
-        $display("PC = 0x%016h, Instruction = 0x%08h", pc_out, instr);
-        #10;
-        $display("PC = 0x%016h, Instruction = 0x%08h", pc_out, instr);
-        #10;
-        $display("PC = 0x%016h, Instruction = 0x%08h", pc_out, instr);
-        #10;
-        $display("PC = 0x%016h, Instruction = 0x%08h", pc_out, instr);
-        #10;
+        // Observe initial fetch before first PC update edge.
+        #1;
+        $display("SEQ: PC_out=0x%016h PC+4=0x%016h Instr=0x%08h", pc_out, pc_plus_4, instr);
+
+        // Test normal sequential fetch (PC + 4)
+        repeat (4) begin
+            @(posedge clk);
+            #1;
+            $display("SEQ: PC_out=0x%016h PC+4=0x%016h Instr=0x%08h", pc_out, pc_plus_4, instr);
+        end
+
+        // Test branch/jump target path (PCSrc = 1)
+        $display("\n--- Testing PCSrc = 1 (branch target) ---");
+        pc_plus_imm = 64'h0;
+        PCSrc = 1'b1;
+        @(posedge clk);
+        #1;
+        $display("BRANCH: PC_out=0x%016h PC+4=0x%016h Instr=0x%08h", pc_out, pc_plus_4, instr);
+
+        // Return to normal sequential fetch
+        PCSrc = 1'b0;
+        @(posedge clk);
+        #1;
+        $display("SEQ: PC_out=0x%016h PC+4=0x%016h Instr=0x%08h", pc_out, pc_plus_4, instr);
+
+        // Test with enable = 0 (PC should hold)
+        $display("\n--- Testing enable = 0 (PC hold) ---");
+        enable = 0;
+        pc_plus_imm = 64'h100;
+        PCSrc = 1'b1;
+        repeat(4) begin
+            @(posedge clk);
+            #1;
+            $display("HOLD: PC_out=0x%016h PC+4=0x%016h Instr=0x%08h", pc_out, pc_plus_4, instr);
+        end
         $finish;
     end
 

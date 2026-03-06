@@ -1,17 +1,31 @@
-`include "PC/pc.v"
-`include "Ins_memory/inst.v"
-`include "ALU/adder64/adder64.v"
+`include "../Modules/Ins_memory/inst.v"
+`include "../Modules/ALU/adder64/adder64.v"
 
 module fetch(
-    input clk, reset,
+    input clk, enable, reset,
     input [63:0] pc_plus_imm,
     input PCSrc,
-    output [63:0] pc_out,
+    output reg [63:0] pc_out, 
+    output [63:0] pc_plus_4,
     output [31:0] instr
-);
+);    
 
-    wire [63:0] pc_in, pc_plus_4;
+    reg [63:0] next_pc;
 
+    always @(*) begin
+        if (PCSrc == 1'b1)
+            next_pc = pc_plus_imm;
+        else
+            next_pc = pc_plus_4;
+    end
+
+    always @ (posedge clk) begin
+        if (reset == 1'b1)
+            pc_out <= 64'b0;
+        else if (enable == 1'b1)
+            pc_out <= next_pc;
+    end
+    
     adder64 add_pc_4(
         .a(pc_out), .b(64'h4),
         .adder_op(1'b0),
@@ -22,17 +36,7 @@ module fetch(
         .neg_flag()
     );
 
-    assign pc_in = (PCSrc) ? pc_plus_imm : pc_plus_4;
-
-    pc program_counter(
-        .clk(clk), 
-        .reset(reset),
-        .pc_in(pc_in),
-        .pc_out(pc_out)
-    );
-
     instmem instruction_memory(
-        .reset(reset),
         .addr(pc_out),
         .instr(instr)
     );

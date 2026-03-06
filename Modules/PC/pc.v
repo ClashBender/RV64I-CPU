@@ -10,9 +10,9 @@ module pc(
     always@(posedge clk) begin
         
         if(reset)
-            pc_out = 64'b0;
+            pc_out <= 64'b0;
         else
-            pc_out = pc_in;
+            pc_out <= pc_in;
     end
 
 endmodule
