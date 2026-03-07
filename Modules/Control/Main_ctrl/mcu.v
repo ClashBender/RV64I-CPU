@@ -45,6 +45,7 @@ module mcu(
                 jump = 1'b1;
                 RegWrite = 1'b1;
                 MemToReg = 2'b10;
+                ALUSrc = ~opcode[3];
             end
         endcase
     end
