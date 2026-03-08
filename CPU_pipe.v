@@ -1,7 +1,21 @@
+`ifndef CPU_PIPE_V
+`define CPU_PIPE_V
+
+`include "1_fetch/IF.v"
+`include "2_decode/ID.v"
+`include "3_execute/EX.v"
+`include "4_memory/MEM.v"
+`include "5_writeback/WB.v"
+`include "Hazards/hazards.v"
+
+
+
 module CPU_pipe(
     input clk, 
     input reset
 );
+
+
 
 // hazard detection block generates stall and flush control signals
 

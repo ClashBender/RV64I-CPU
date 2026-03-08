@@ -1,3 +1,6 @@
+`ifndef execute
+`define execute 
+
 `include "../Modules/ALU/alu.v"
 `include "../Modules/ALU/adder64/adder64.v"
 
@@ -97,3 +100,4 @@ end
     and A1(temp,zero_E,Branch_D);
     or A2(PCSrc_E,temp,Jump_D);
 endmodule
+`endif

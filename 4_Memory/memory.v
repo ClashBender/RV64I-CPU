@@ -1,10 +1,13 @@
+`ifndef memory
+`define memory
+
 `include "../Modules/Data_memory/data_mem.v"
 `include "../Modules/ALU/adder64/adder64.v"
 
 module memory(
     input clk, reset,
     // controls
-    input RegWrite_E, MemWrite_E,
+    input RegWrite_E, MemWrite_E, MemRead_E,
     input [1:0] MemToReg_E,
     
     //ALU
@@ -28,7 +31,7 @@ data_mem data_mem(
     .clk(clk),
     .reset(reset),
     .MemWrite(MemWrite_E),
-    .MemRead(),         // WHAT DO I ADD ?? (there is no control signal to add)
+    .MemRead(MemRead_E),
     .address(alu_res_E[9:0]),       
     .write_data(write_data_E),
     .read_data(read_data_M)
@@ -39,3 +42,5 @@ data_mem data_mem(
  assign pc_plus_4_M = pc_plus_4_E;
 
 endmodule
+
+`endif

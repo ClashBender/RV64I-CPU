@@ -1,3 +1,6 @@
+`ifndef decode
+`define decode
+
 `include "../Modules/Control/Main_ctrl/mcu.v"
 `include "../Modules/Control/ALU_ctrl/alu_ctrl.v"
 `include "../Modules/Reg_file/reg.v"
@@ -63,7 +66,7 @@ module decode(
         .ALUOp(ALUOp),
         .funct7(funct7),
         .funct3(funct3),
-        .inst5(instr[5]),
+        .inst5(instr_F[5]),
         .ALU_ctrl(ALUCtrl_D)
     );
 
@@ -77,7 +80,7 @@ module decode(
     );
 
     imm imm_inst(
-        .instruction(instr),
+        .instruction(instr_F),
         .imm_out(imm_D)
     );
 
@@ -85,3 +88,4 @@ module decode(
     assign pc_plus_4_D = pc_plus_4_F;
 
 endmodule
+`endif  

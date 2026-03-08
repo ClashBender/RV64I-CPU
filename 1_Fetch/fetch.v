@@ -1,3 +1,6 @@
+`ifndef fetch
+`define fetch
+
 `include "../Modules/Ins_memory/inst.v"
 `include "../Modules/ALU/adder64/adder64.v"
 
@@ -42,3 +45,5 @@ module fetch(
     );
     
 endmodule
+
+`endif

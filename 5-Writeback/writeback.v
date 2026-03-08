@@ -1,3 +1,6 @@
+`ifndef writeback
+`define writeback
+
 `include "../Modules/ALU/adder64/adder64.v"
 
 
@@ -34,3 +37,5 @@ always @(*) begin
 end
 
 endmodule
+
+`endif
