@@ -349,16 +349,16 @@ required for instructions with multiple variants.
         \texttt{[63:0] address, write\_data}
   \item[Outputs:] \texttt{[63:0] read\_data}
 \end{description}
-The Data Memory Module simulates a 1024-Byte memory space for load and store 
-operations. It supports 64-bit wide data access and is byte-addressable. 
+The Data Memory Module simulates a 1024-Byte memory space for load and store
+operations. It supports 64-bit wide data access and is byte-addressable.
 Upon initialization and on assertion of reset, its contents are set to zero.
 For simplicity data writing takes just one clock cycle, and data reading is
-combinational - meaning that the output data is available immediately after 
+combinational - meaning that the output data is available immediately after
 the address is provided. This was necessary to ensure that each instruction
 executes in a single cycle, as required by the project document. The control
-signals determine whether the module performs a read or write operation. The 
-module also includes boundary checks to prevent out-of-bounds memory access. 
-For example, if an instruction tries to store the contents of, say, x20 at 
+signals determine whether the module performs a read or write operation. The
+module also includes boundary checks to prevent out-of-bounds memory access.
+For example, if an instruction tries to store the contents of, say, x20 at
 address 1020, the module would simply ignore the instruction it since 8 bytes
 are required but only 4 are available.
 4 are available.
