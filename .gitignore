@@ -7,8 +7,10 @@
 # Ignoring latex compilation intermediary files
 report/*
 !report/references.bib
-!report/report.pdf
-!report/report.tex
+!report/report_seq.pdf
+!report/report_seq.tex
+!report/report_pipe.pdf
+!report/report_pipe.tex
 !report/figures/
 
 # Ignore build artifacts

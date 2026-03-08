@@ -1,3 +1,7 @@
+module CPU_pipe(
+    input clk, 
+    input reset
+);
 
 // hazard detection block generates stall and flush control signals
 
@@ -8,3 +12,5 @@
 // EX/MEM reg: needs to take 0s if flush is asserted, else update on clock edge
 
 // MEM/WB reg: updates on every clock edge regardless of stall and flush
+
+endmodule
