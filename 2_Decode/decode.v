@@ -9,7 +9,7 @@ module decode(
     input clk, reset, 
 
     // from prev (IF) stage
-    input [31:0] instr,
+    input [31:0] instr_F,
     input [63:0] pc_F, pc_plus_4_F,
 
     // from WB stage 
@@ -19,7 +19,7 @@ module decode(
 
     // control signals
     output RegWrite_D, MemWrite_D, Jump_D, Branch_D, MemRead_D,
-    output [1:0] MemToReg_D,
+    output [1:0] MemToReg_D, // resultsrc is same as memtoreg
     output [3:0] ALUCtrl_D,
     output ALUSrc_D,
 
@@ -38,12 +38,12 @@ module decode(
     wire [2:0] funct3;
     wire [6:0] funct7;
 
-    assign opcode = instr[6:0];
-    assign funct3 = instr[14:12];
-    assign funct7 = instr[31:25];
-    assign rs1_D = instr[19:15];
-    assign rs2_D = instr[24:20];
-    assign rd_D = instr[11:7];
+    assign opcode = instr_F[6:0];
+    assign funct3 = instr_F[14:12];
+    assign funct7 = instr_F[31:25];
+    assign rs1_D = instr_F[19:15];
+    assign rs2_D = instr_F[24:20];
+    assign rd_D = instr_F[11:7];
 
     wire [1:0] ALUOp;
 

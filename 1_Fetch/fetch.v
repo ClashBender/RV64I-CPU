@@ -3,20 +3,20 @@
 
 module fetch(
     input clk, enable, reset,
-    input [63:0] pc_plus_imm,
-    input PCSrc,
+    input [63:0] pc_tar_E,
+    input PCSrc_E,
     output reg [63:0] pc_out, 
-    output [63:0] pc_plus_4,
-    output [31:0] instr
+    output [63:0] pc_plus_4_F,
+    output [31:0] instr_F
 );    
 
     reg [63:0] next_pc;
 
     always @(*) begin
-        if (PCSrc == 1'b1)
-            next_pc = pc_plus_imm;
+        if (PCSrc_E == 1'b1)
+            next_pc = pc_tar_E;
         else
-            next_pc = pc_plus_4;
+            next_pc = pc_plus_4_F;
     end
 
     always @ (posedge clk) begin
@@ -29,16 +29,16 @@ module fetch(
     adder64 add_pc_4(
         .a(pc_out), .b(64'h4),
         .adder_op(1'b0),
-        .result(pc_plus_4),
+        .result(pc_plus_4_F),
         .cout(),
         .carry_flag(),
         .overflow_flag(),
         .neg_flag()
     );
 
-    instmem instruction_memory(
+    instmem instr_Fuction_memory(
         .addr(pc_out),
-        .instr(instr)
+        .instr_F(instr_F)
     );
     
 endmodule
