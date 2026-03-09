@@ -8,7 +8,7 @@ module fetch(
     input clk, enable, reset,
     input [63:0] pc_tar_E,
     input PCSrc_E,
-    output reg [63:0] pc_out, 
+    output reg [63:0] pc_out_F, 
     output [63:0] pc_plus_4_F,
     output [31:0] instr_F
 );    
@@ -24,13 +24,13 @@ module fetch(
 
     always @ (posedge clk) begin
         if (reset == 1'b1)
-            pc_out <= 64'b0;
+            pc_out_F <= 64'b0;
         else if (enable == 1'b1)
-            pc_out <= next_pc;
+            pc_out_F <= next_pc;
     end
     
     adder64 add_pc_4(
-        .a(pc_out), .b(64'h4),
+        .a(pc_out_F), .b(64'h4),
         .adder_op(1'b0),
         .result(pc_plus_4_F),
         .cout(),
@@ -40,7 +40,7 @@ module fetch(
     );
 
     instmem instr_Fuction_memory(
-        .addr(pc_out),
+        .addr(pc_out_F),
         .instr_F(instr_F)
     );
     

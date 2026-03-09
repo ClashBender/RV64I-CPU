@@ -6,33 +6,31 @@
 
 module writeback(
     input clk, reset,
-    input RegWrite_M,
-    input [1:0] MemToReg_M,
-    input [63:0] alu_res_M,
-    input [63:0] read_data_M,
-    input [4:0] rd_M,
-    input [63:0] pc_plus_4_M,
+    //input RegWrite_M,
+    input [1:0] MemToReg_W,
+    input [63:0] alu_res_W,
+    input [63:0] read_data_W,
+    // input [4:0] rd_M,
+    input [63:0] pc_plus_4_W,
 
-    output RegWrite_W,
-    output [1:0] MemToReg_W,
-    output [63:0] pc_plus_4_W,
-    output reg [63:0] result_W,
-    output [4:0] rd_W
+    output [63:0] result_W,
+    
 );
 
-assign MemToReg_W = MemToReg_M;
-assign rd_W = rd_M;
-assign pc_plus_4_W = pc_plus_4_M;
-assign RegWrite_W = RegWrite_M;
+// done in top module
+// assign MemToReg_W = MemToReg_M;
+// assign rd_W = rd_M;
+// assign pc_plus_4_W = pc_plus_4_M;
+// assign RegWrite_W = RegWrite_M;
 
 
 // 3x1 mux
 always @(*) begin
     case(MemToReg_W)
-        2'b00: result_W = alu_res_M;
-        2'b01: result_W = read_data_M;
+        2'b00: result_W = alu_res_W;
+        2'b01: result_W = read_data_W;
         2'b10: result_W = pc_plus_4_W;
-        default: result_W = alu_res_M;
+        default: result_W = alu_res_W;
     endcase
 end
 
