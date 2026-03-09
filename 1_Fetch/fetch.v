@@ -39,7 +39,7 @@ module fetch(
         .neg_flag()
     );
 
-    instmem instr_Fuction_memory(
+    instmem instr_memory(
         .addr(pc_out_F),
         .instr(instr_F)
     );
