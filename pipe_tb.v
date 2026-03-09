@@ -60,8 +60,16 @@ module pipe_tb ();
                     finished = 0;
                 end
             end
-        end
 
+        $display("clock %0d: forwardA_E %0d \n", cycle_count,  uut.forwardA_E);
+        $display("clock %0d: forwardB_E %0d \n", cycle_count,  uut.forwardB_E);
+        $display("clock %0d: reg_write_M %0d \n", cycle_count,  uut.RegWrite_M);
+        $display("clock %0d: rs1_E %0d \n", cycle_count,  uut.rs1_E);
+        $display("clock %0d: rs2_E %0d \n", cycle_count,  uut.rs2_E);
+        $display("clock %0d: rd_M %0d \n", cycle_count,  uut.rd_M);
+
+        end
+        // ((rs2_e == rd_m) && reg_write_m) && (rs2_e != 0)
         if (finished >= 4) begin
             #1; // let posedge clk logic in CPU settle before reading registers
             
@@ -81,9 +89,9 @@ module pipe_tb ();
                     $fwrite(reg_file,"%0d", cycle_count);
                 end
 
-                $fwrite(data_log, "%h", uut.MEM_stage.data_mem.data[i]);
-                if((i+1)%8 == 0)
-                    $fwrite(data_log, "\n");
+                $fwrite(data_log, "%0d: %h\n", i,  uut.MEM_stage.data_mem.data[i]);
+                // if((i+1)%8 == 0)
+                //     $fwrite(data_log, "\n");
             end
 
             $fclose(reg_log);
@@ -100,3 +108,4 @@ module pipe_tb ();
     end
 
 endmodule
+

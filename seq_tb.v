@@ -69,9 +69,10 @@ module seq_tb ();
                     $fwrite(reg_file,"%0d", cycle_count);
                 end
 
-                $fwrite(data_log, "%h", uut.A8.data[i]);
-                if((i+1)%8 == 0)
-                    $fwrite(data_log, "\n");
+                $fwrite(data_log, "%0d: %h\n", i,  uut.A8.data[i]);
+                // $fwrite(data_log, "%h", uut.A8.data[i]);
+                // if((i+1)%8 == 0)
+                //     $fwrite(data_log, "\n");
             end
 
 

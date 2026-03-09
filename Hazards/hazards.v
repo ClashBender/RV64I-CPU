@@ -1,7 +1,7 @@
 module hazards(
     input [4:0] rs1_d, rs2_d, rs1_e, rs2_e, rs2_m,
     input [4:0] rd_e, rd_m, rd_w,
-    input reg_write_m, mem_write_m, reg_write_w, pc_src_m, mem_write_d,
+    input reg_write_m, mem_write_m, reg_write_w, PCSrc_E, mem_write_d,
     input [1:0] mem_to_reg_e, //00 for R-type, 01 for ld, 10 for jalr
     output reg [1:0] forward_ae, forward_be,
     output reg forward_m, 
@@ -44,7 +44,7 @@ module hazards(
             stall = 1'b1;
         end
         // Control hazard detection (for branches and jal)
-        else if (pc_src_m) begin //pc_src_mem is the output of ((zero_flag & branch_signal)||jump)
+        else if (PCSrc_E) begin //pc_src_mem is the output of ((zero_flag & branch_signal)||jump)
             flush = 1'b1;
         end
     

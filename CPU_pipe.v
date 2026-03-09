@@ -33,7 +33,7 @@ wire [63:0] rs1_data_D, rs2_data_D, imm_D;
 
 
 //e
-wire pcsrc_E;
+wire PCSrc_E;
 wire [63:0] pc_tar_E, alu_res_E, write_data_E;
 
 reg RegWrite_E, MemWrite_E, Jump_E, Branch_E, MemRead_E, ALUSrc_E;
@@ -73,10 +73,10 @@ hazards hazard_block(
     .rd_e        (rd_E),
     .rd_m        (rd_M),
     .rd_w        (rd_W),
-    .reg_write_m (reg_write_M),
-    .mem_write_m (mem_write_M),
-    .reg_write_w (reg_write_W),
-    .pc_src_m    (pc_src_M),
+    .reg_write_m (RegWrite_M),
+    .mem_write_m (MemWrite_M),
+    .reg_write_w (RegWrite_W),
+    .PCSrc_E    (PCSrc_E),
     .mem_write_d (MemWrite_D),
     .mem_to_reg_e(MemToReg_E),
     .forward_ae  (forwardA_E),
@@ -98,7 +98,6 @@ fetch IF_stage(
     .pc_plus_4_F(pc_plus_4_F), // to ID stage
     .instr_F(instr_F) // to ID stage
 );
-
 
 // IF/ID reg: needs to hold previous values if stall is asserted, needs to be flushed with 0s if flush is asserted, else update on clock edge
 always @ (posedge clk) begin
