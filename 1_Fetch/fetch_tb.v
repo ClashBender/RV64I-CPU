@@ -29,7 +29,7 @@ module fetch_tb();
         integer i;
         begin
             // Read byte data from instructions.txt
-            $readmemh("../Testcases/simple.txt", byte_mem);
+            $readmemh("Testcases/simple.txt", byte_mem);
             
             // Load bytes into instruction memory (4 bytes per instruction)
             for (i = 0; i < 1024; i = i + 1) begin

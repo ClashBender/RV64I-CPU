@@ -1,10 +1,10 @@
 `ifndef decode
 `define decode
 
-`include "../Modules/Control/Main_ctrl/mcu.v"
-`include "../Modules/Control/ALU_ctrl/alu_ctrl.v"
-`include "../Modules/Reg_file/reg.v"
-`include "../Modules/Imm_gen/imm.v"
+`include "Modules/Control/Main_ctrl/mcu.v"
+`include "Modules/Control/ALU_ctrl/alu_ctrl.v"
+`include "Modules/Reg_file/reg.v"
+`include "Modules/Imm_gen/imm.v"
 
 module decode(
 
@@ -31,7 +31,7 @@ module decode(
     output [4:0] rs1_D, rs2_D, rd_D,
     
     // immediate value
-    output [63:0] imm_D,
+    output [63:0] imm_D
 
     // pc values lmfao
     // output [63:0] pc_D, pc_plus_4_D

@@ -1,4 +1,4 @@
-module forward(
+module hazards(
     input [4:0] rs1_d, rs2_d, rs1_e, rs2_e, rs2_m,
     input [4:0] rd_e, rd_m, rd_w,
     input reg_write_m, mem_write_m, reg_write_w, pc_src_m, mem_write_d,

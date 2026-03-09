@@ -1,8 +1,8 @@
 `ifndef memory
 `define memory
 
-`include "../Modules/Data_memory/data_mem.v"
-`include "../Modules/ALU/adder64/adder64.v"
+`include "Modules/Data_memory/data_mem.v"
+`include "Modules/ALU/adder64/adder64.v"
 
 module memory(
     input clk, reset,
@@ -23,7 +23,7 @@ module memory(
     //output [4:0] rd_M,
     //output [63:0] pc_plus_4_M,
     // data memory
-    output [63:0] read_data_M,
+    output [63:0] read_data_M
     //output [63:0] alu_res_M
 );
 

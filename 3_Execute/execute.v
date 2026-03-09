@@ -1,8 +1,8 @@
 `ifndef execute
 `define execute 
 
-`include "../Modules/ALU/alu.v"
-`include "../Modules/ALU/adder64/adder64.v"
+`include "Modules/ALU/alu.v"
+`include "Modules/ALU/adder64/adder64.v"
 
 module execute(
     // general signals
@@ -20,7 +20,7 @@ module execute(
     input [63:0] imm_E,
 
     // pc values lmfao (done in top module)
-    // input [63:0] pc_E, pc_plus_4_E,
+    input [63:0] pc_E, pc_plus_4_E,
 
     // forwarding inputs 
     input [1:0] forwardA_E,forwardB_E,
@@ -31,7 +31,7 @@ module execute(
     // output [1:0] MemToReg_E,
 
     // alu output
-    output [63:0] alu_res_E, write_data_E,pc_tar_E,
+    output [63:0] alu_res_E, write_data_E,pc_tar_E
     
     //(done in top module)
     // output [63:0] pc_plus_4_E,

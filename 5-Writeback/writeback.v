@@ -1,7 +1,7 @@
 `ifndef writeback
 `define writeback
 
-`include "../Modules/ALU/adder64/adder64.v"
+`include "Modules/ALU/adder64/adder64.v"
 
 
 module writeback(
@@ -13,7 +13,7 @@ module writeback(
     // input [4:0] rd_M,
     input [63:0] pc_plus_4_W,
 
-    output [63:0] result_W,
+    output reg [63:0] result_W
     
 );
 

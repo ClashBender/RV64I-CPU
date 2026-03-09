@@ -1,11 +1,11 @@
 `ifndef CPU_PIPE_V
 `define CPU_PIPE_V
 
-`include "1_fetch/IF.v"
-`include "2_decode/ID.v"
-`include "3_execute/EX.v"
-`include "4_memory/MEM.v"
-`include "5_writeback/WB.v"
+`include "1_Fetch/fetch.v"
+`include "2_Decode/decode.v"
+`include "3_Execute/execute.v"
+`include "4_Memory/memory.v"
+`include "5-Writeback/writeback.v"
 `include "Hazards/hazards.v"
 
 
@@ -25,21 +25,21 @@ wire [63:0] pc_plus_4_F, pc_out_F;
 reg [31:0] instr_D;
 reg [63:0] pc_plus_4_D, pc_out_D;
 
-wire RegWrite_D, MemWrite_D, Jump_D, Branch_D, MemRead_D, ALUSrc_D
-wire [1:0] MemToReg_D, // resultsrc is same as memtoreg
-wire [3:0] ALUCtrl_D,
-wire [4:0] rs1_D, rs2_D, rd_D,
-wire [63:0] rs1_data_D, rs2_data_D, imm_D
+wire RegWrite_D, MemWrite_D, Jump_D, Branch_D, MemRead_D, ALUSrc_D;
+wire [1:0] MemToReg_D; // resultsrc is same as memtoreg
+wire [3:0] ALUCtrl_D;
+wire [4:0] rs1_D, rs2_D, rd_D;  
+wire [63:0] rs1_data_D, rs2_data_D, imm_D;
 
 
 //e
 wire pcsrc_E;
-wire [63:0] pc_tar_E; alu_res_E, write_data_E,
+wire [63:0] pc_tar_E, alu_res_E, write_data_E;
 
 reg RegWrite_E, MemWrite_E, Jump_E, Branch_E, MemRead_E, ALUSrc_E;
-reg [1:0] MemToReg_E, // resultsrc is same as memtoreg
-reg [3:0] ALUCtrl_E,
-reg [4:0] rs1_E, rs2_E, rd_E,
+reg [1:0] MemToReg_E; // resultsrc is same as memtoreg
+reg [3:0] ALUCtrl_E;
+reg [4:0] rs1_E, rs2_E, rd_E;
 reg [63:0] pc_plus_4_E, pc_out_E, rs1_data_E, rs2_data_E, imm_E;
 
 //m
@@ -47,23 +47,44 @@ wire [63:0] read_data_M;
 
 reg RegWrite_M, MemWrite_M, MemRead_M;
 reg [1:0] MemToReg_M;
-reg [4:0] rd_M;
+reg [4:0] rs1_M, rs2_M, rd_M;
 reg [63:0] alu_res_M, write_data_M, pc_plus_4_M;
 
 
 //w
-wire [63:0] result_W,
+wire [63:0] result_W;
 
-reg RegWrite_W, 
-reg [1:0] MemToReg_W,
-reg [4:0] rd_W,
+reg RegWrite_W;
+reg [1:0] MemToReg_W;
+reg [4:0] rd_W;
 reg [63:0] read_data_W, alu_res_W, pc_plus_4_W;
 
+wire [1:0] forwardA_E, forwardB_E;
+wire forward_M;
 
 
 //Hazard Detection Block
-
-
+hazards hazard_block(
+    .rs1_d       (rs1_D),
+    .rs2_d       (rs2_D),
+    .rs1_e       (rs1_E),
+    .rs2_e       (rs2_E),
+    .rs2_m       (rs2_M),
+    .rd_e        (rd_E),
+    .rd_m        (rd_M),
+    .rd_w        (rd_W),
+    .reg_write_m (reg_write_M),
+    .mem_write_m (mem_write_M),
+    .reg_write_w (reg_write_W),
+    .pc_src_m    (pc_src_M),
+    .mem_write_d (MemWrite_D),
+    .mem_to_reg_e(MemToReg_E),
+    .forward_ae  (forwardA_E),
+    .forward_be  (forwardB_E),
+    .forward_m   (forward_M),
+    .stall       (stall),
+    .flush       (flush)
+);
 
 //Instantiating the IF stage
 fetch IF_stage(
@@ -164,6 +185,8 @@ always @ (posedge clk) begin
         {alu_res_M, write_data_M} <= 0;
         rd_M <= 0;
         pc_plus_4_M <= 0;
+        rs1_M <= 0;
+        rs2_M <= 0;
     end 
     else begin
         // update all EX/MEM pipeline registers with new values from EX stage
@@ -171,7 +194,9 @@ always @ (posedge clk) begin
         MemToReg_M <= MemToReg_E;
         {alu_res_M, write_data_M} <= {alu_res_E, write_data_E};
         rd_M <= rd_E;
-        pc_plus_4_M <=  pc_plus_4_E; 
+        pc_plus_4_M <=  pc_plus_4_E;
+        rs1_M <= rs1_E;
+        rs2_M <= rs2_E; 
     end
 end
 
@@ -198,7 +223,7 @@ always @ (posedge clk) begin
     else begin
     // update all MEM/WB pipeline registers with new values from MEM stage
         RegWrite_W <= RegWrite_M;
-        MemToreg_W <= MemToReg_M;
+        MemToReg_W <= MemToReg_M;
         read_data_W <= read_data_M;
         rd_W <= rd_M;
         pc_plus_4_W <= pc_plus_4_M;
@@ -217,3 +242,4 @@ writeback WB_stage(
 
 
 endmodule
+`endif 

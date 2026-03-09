@@ -1,8 +1,8 @@
 `ifndef fetch
 `define fetch
 
-`include "../Modules/Ins_memory/inst.v"
-`include "../Modules/ALU/adder64/adder64.v"
+`include "Modules/Ins_memory/inst.v"
+`include "Modules/ALU/adder64/adder64.v"
 
 module fetch(
     input clk, enable, reset,
@@ -41,7 +41,7 @@ module fetch(
 
     instmem instr_Fuction_memory(
         .addr(pc_out_F),
-        .instr_F(instr_F)
+        .instr(instr_F)
     );
     
 endmodule
