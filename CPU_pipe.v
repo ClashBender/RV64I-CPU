@@ -61,6 +61,8 @@ reg [63:0] read_data_W, alu_res_W, pc_plus_4_W;
 
 
 
+//Hazard Detection Block
+
 
 
 //Instantiating the IF stage
