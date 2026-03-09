@@ -35,31 +35,19 @@ module forward(
 
     // STALL/FLUSH DETECTION 
 
+        stall = 1'b0;
+        flush = 1'b0;
         // Load-use hazard detection
         // 01 => data memory read and will be written into reg in wb stage. 
         // mem_write_d ensures that it does not trigger for the case of "ld followed by sd", since that case can be resolved with forwarding
         if ((mem_to_reg_e == 2'b01) && (mem_write_d) && (rd_e != 0) && ((rs1_d == rd_e) || (rs2_d == rd_e))) begin 
             stall = 1'b1;
-            flush = 1'b0;
         end
         // Control hazard detection (for branches and jal)
         else if (pc_src_m) begin //pc_src_mem is the output of ((zero_flag & branch_signal)||jump)
-            stall = 1'b0;
             flush = 1'b1;
         end
-        else begin
-            stall = 1'b0;
-            flush = 1'b0;
-        end
     
     end
-
-    
-    
-
-    always @(*) begin
-        
-    end
-   
 
 endmodule

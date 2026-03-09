@@ -15,8 +15,6 @@ module CPU_pipe(
     input reset
 );
 
-
-
 // hazard detection block generates stall and flush control signals
 
 // IF/ID reg: needs to hold previous values if stall is asserted, needs to be flushed with 0s if flush is asserted, else update on clock edge
