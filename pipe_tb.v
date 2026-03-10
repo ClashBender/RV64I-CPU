@@ -26,7 +26,7 @@ module pipe_tb ();
 
         // Load instructions into instruction memory
         if(control == 0)
-            $readmemh("Testcases/instructions.txt", uut.IF_stage.instr_memory.byte_mem);
+            $readmemh("Testcases/haz_test_6.txt", uut.IF_stage.instr_memory.byte_mem);
         else if (control == 1)
             $readmemh("instructions.txt", uut.IF_stage.instr_memory.byte_mem);
 

@@ -14,3 +14,4 @@ addi x8 x8 1      # branch target: should execute, so x8 becomes 1
 addi x0 x0 0
 addi x0 x0 0
 addi x0 x0 0
+
