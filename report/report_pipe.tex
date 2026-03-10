@@ -89,13 +89,13 @@ subset of instructions:
 
 \section{Overview of the Pipelined Architecture}
 
-\begin{figure}[!ht]
+\begin{figure*}[!ht]
     \centering
-    \includegraphics[width=0.45\textwidth]{figures/pipelined_processor.png}
+    \includegraphics[width=0.95\textwidth]{figures/pipelined_processor.png}
     \caption{High-level architecture of the RV64I pipelined processor. Courtesy of \textit{Digital Design and Computer Architecture,}
         \cite{harris2021digital}}
     \label{fig:pipelined_processor}
-\end{figure}
+\end{figure*}
 
 The RV64I CPU consists of several key modules that work in conjunction to
 execute instructions. Fig. \ref{fig:pipelined_processor} illustrates the high-level
@@ -226,6 +226,58 @@ if(((rs1_e == rd_m) && reg_write_m) &&
 
 Of course, the same follows for \texttt{rs2} and \texttt{forward\_be}.
 
+
+This forwarding mechanism eliminates most RAW hazards without
+stalling the pipeline.
+
+\subsubsection{\textbf{Load-Use Hazards and Stalling}}
+
+Forwarding cannot solve all RAW hazards. A critical exception is the
+\textbf{load-use hazard}, where a load instruction is immediately followed by an
+instruction that uses the loaded data:
+
+\begin{lstlisting}[language=RISCV]
+    # load use STALL test 
+    addi x5 x0 8
+    sd x5 0(x0) # mem[0] = 8
+    ld x6 0(x0) 
+    or x7 x6 x0 
+    # x7 = 8 if works, otherwise x7 = 0
+\end{lstlisting}
+
+The problem is that the data from memory becomes available only at the end of
+the MEM stage, but the \texttt{add} instruction needs it at the beginning of
+the EX stage—one cycle too early. Forwarding paths exist, but the data
+simply isn't ready yet.
+
+To fix this, we introduced stall and flush signals to temporarily disable/clear
+the registers - this lets us introduce "bubbles" into the pipeline that let the
+load instruction execute in MEM before the next instruction reaches EX - then
+the MEM-EX forwarding path can be utilized.
+
+Note that we check if \texttt{mem\_write\_d == 1'b0}, so that we don't
+accidentally stall the pipeline for a load-store data hazard as we discussed
+earlier.
+
+Hence, the code looks as follows:
+
+\begin{lstlisting}[language=verilog]
+always @ (*) begin
+    stall = 1'b0;
+    flush = 1'b0;
+    if ((mem_to_reg_e == 2'b01) && (mem_write_d == 1'b0) && (rd_e != 0) && ((rs1_d == rd_e) || (rs2_d == rd_e))) begin 
+        stall = 1'b1;
+    end
+    // Control hazard detection (for beq and jal)
+    else if (PCSrc_E) begin //pc_src_mem = (zero_flag & branch_signal) | jump
+        flush = 1'b1;
+    end
+end
+\end{lstlisting}
+
+This single-cycle penalty is unavoidable for load-use hazards but minimizes
+performance impact compared to more conservative stalling strategies.
+
 \begin{tcolorbox}
     \textbf{Bonus: About Load-to-Store Forwarding}
 
@@ -259,68 +311,29 @@ if(((rd_w == rs2_m) && reg_write_w && mem_write_m) && (rs2_m != 0))
     stalling.
 \end{tcolorbox}
 
-This forwarding mechanism eliminates most RAW hazards without
-stalling the pipeline.
-
-\subsubsection{\textbf{Load-Use Hazards and Stalling}}
-
-Forwarding cannot solve all RAW hazards. A critical exception is the
-\textbf{load-use hazard}, where a load instruction is immediately followed by an
-instruction that uses the loaded data:
-
-\begin{verbatim}
-    ld x5, 0(x1)      # Load x5 from memory
-    add x6, x5, x2    # Immediately use x5
-\end{verbatim}
-
-The problem is that the data from memory becomes available only at the end of
-the MEM stage, but the \texttt{add} instruction needs it at the beginning of
-the EX stage—one cycle too early. Forwarding paths exist, but the data
-simply isn't ready yet.
-
-To fix this, we introduced stall and flush signals to temporarily disable/clear
-the registers - this lets us introduce "bubbles" into the pipeline that let the
-load instruction execute in MEM before the next instruction reaches EX - then
-the MEM-EX forwarding path can be utilized. Hence:
-
-\begin{lstlisting}[language=verilog]
-always @ (*) begin
-    stall = 1'b0;
-    flush = 1'b0;
-    if ((mem_to_reg_e == 2'b01) && (mem_write_d == 1'b0) && (rd_e != 0) && ((rs1_d == rd_e) || (rs2_d == rd_e))) begin 
-        stall = 1'b1;
-    end
-    // Control hazard detection (for beq and jal)
-    else if (PCSrc_E) begin //pc_src_mem = (zero_flag & branch_signal) | jump
-        flush = 1'b1;
-    end
-end
-\end{lstlisting}
-
-Note that we check if \texttt{mem\_write\_d == 1'b0}, so that we don't
-accidentally stall the pipeline for a load-store data hazard as we discussed
-earlier.
-
-This single-cycle penalty is unavoidable for load-use hazards but minimizes
-performance impact compared to more conservative stalling strategies.
-
 \subsection{Control Hazards}
 
 Control hazards (also called branch hazards) occur when the pipeline must make
-decisions about instruction flow before determining whether a branch will be
+decisions about instruction flow before being able to determine whether a branch will be
 taken. In a pipelined processor, by the time a branch instruction reaches the
 stage where its condition is evaluated, several subsequent instructions have
 already been fetched into the pipeline. If the branch is taken, these
-speculatively fetched instructions are incorrect and must be discarded.
+wrongly fetched instructions must be flushed.
 
 Consider this example:
 \begin{lstlisting}[language=RISCV]
-    beq x1, x2, target    # Branch if x1 == x2
-    add x3, x4, x5        # Next sequential instruction
-    sub x6, x7, x8        # Another sequential instruction
-target:
-    or x9, x10, x11       # Branch target
+    # branch flush test
+    addi x5 x0 4      # x5 = 4
+    addi x6 x0 4      # x6 = 4
+    addi x0 x0 0
+    addi x0 x0 0  
+
+    beq x5 x6 8      
+    addi x7 x7 1      # wrong path: must be flushed, so x7 should stay 0
+    addi x8 x8 1      # branch target: should execute, so x8 becomes 1
+
 \end{lstlisting}
+
 
 \subsubsection{Static Branch Prediction}
 Static branch prediction is a simple technique that predicts the outcome of a
@@ -337,15 +350,47 @@ be executed.
 \section{Implementation Details}
 
 \subsection{Structure}
-Each module of the CPU has its own designated folder, containing:
+The GitHub repository is organized as follows:
+
 \begin{itemize}
-    \item The file containing the module itself (\texttt{<module>.v})
-    \item A testbench to validate each of the functions of that module (\texttt{<module>\_tb.v})
-    \item A bunch of intermediary files (\texttt{.vvp, .vcd}) that plot outputs
+    \item \textbf{Top-level files:} \texttt{CPU\_seq.v} and \texttt{seq\_tb.v}
+          for the sequential (single-cycle) CPU, \texttt{pipe\_tb.v} for the
+          pipelined CPU testbench, \texttt{script.sh} for automating assembly
+          and simulation, and \texttt{register\_file.txt} for output register
+          state.
+
+    \item \textbf{Pipeline stage folders} (\texttt{1\_Fetch/} through
+          \texttt{5-Writeback/}): Each stage of the pipeline has its own folder
+          containing the stage wrapper module that instantiates the relevant
+          sub-modules.
+
+    \item \textbf{Modules/:} Contains all shared building blocks:
+          \begin{itemize}
+              \item \texttt{ALU/} --- 64-bit ALU with sub-modules for addition,
+                    bitwise logic, shifting, and multiplexing
+              \item \texttt{Control/} --- Main control unit and ALU control decoder
+              \item \texttt{Data\_memory/} --- Data memory module
+              \item \texttt{Imm\_gen/} --- Immediate generator
+              \item \texttt{Ins\_memory/} --- Instruction memory
+              \item \texttt{PC/} --- Program counter register
+              \item \texttt{Reg\_file/} --- 32$\times$64-bit register file
+          \end{itemize}
+
+    \item \textbf{Hazards/:} Contains the hazard detection and
+          forwarding unit used by the pipelined CPU.
+
+    \item \textbf{Assembler/:} A custom assembler written in C that
+          translates RV64I assembly into hexadecimal machine code.
+
+    \item \textbf{Testcases/:} Assembly programs (\texttt{.asm}) and
+          their assembled hex outputs (\texttt{.txt}).
+
+    \item \textbf{Report/:} LaTeX source files for the sequential and
+          pipelined CPU reports, along with figures and references.
 \end{itemize}
 
-Apart from these folders, we also have a folder for testcases, written in
-assembly(\texttt{.asm files}) - however, \texttt{.txt} files also work.
+Each module folder additionally contains the module source file
+(\texttt{<module>.v}) and a respective testbench (\texttt{<module>\_tb.v})
 
 \subsubsection{Assembler and its Features}
 We've also written a custom assembler in C - to translate RISC-V assembly code
@@ -387,6 +432,36 @@ concerns and facilitates future extensions. All modules have been thoroughly
 tested and verified to operate correctly. The Phase 1 design provides a solid
 foundation for implementing a pipelined processor in subsequent phases.
 
+\section{Contributions and Acknowledgements}
+
+We're glad to say that all of the team's members have equally contributed to
+this project - however, the major contributions by each member are as follows:
+
+\subsection{Pavani}
+\begin{itemize}
+    \item Wrote some constituent modules and their respective testbenches.
+    \item Was responsible for integrating the sequential CPU.
+    \item Helped build some stages of the pipeline.
+\end{itemize}
+
+\subsection{Ritvik}
+\begin{itemize}
+    \item Was responsible for building an assembler and a script to drastically
+          improve debugging capabilities.
+    \item Made some modules and respective testbenches for the CPU.
+    \item Helped build some stages of the pipeline.
+    \item Wrote the report for both phases of the project.
+\end{itemize}
+
+\subsection{Nikhilesh}
+\begin{itemize}
+    \item Implemented the Hazard Unit for different types of hazards.
+    \item Wrote comprehensive assembly testcases to test various hazard capabilities of the CPU.
+    \item Was responsible for integrating the pipelined CPU.
+\end{itemize}
+
+We'd also like to say thanks to the professor, \textbf{Dr. Priyesh Shukla}, and
+the TAs for helping us with the project - both theory and implementation.
 
 \ifCLASSOPTIONcaptionsoff
     \newpage
