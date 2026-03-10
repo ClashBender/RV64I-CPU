@@ -5,6 +5,7 @@
 \usepackage{graphicx}
 \usepackage{textcomp}
 \usepackage{wrapfig}
+\usepackage{float}
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{enumitem}
@@ -161,10 +162,19 @@ Mentioned below are two types of RAW hazards that can be solved by forwarding.
     and x6 x5 x5 
     # x6 = 5 if works, otherwise x6 = 0
 \end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/haz_test_1.png}
+    \caption{mem -\>ex data hazard}
+    \label{haz1}
+\end{figure}
+
+
 Without hazard handling, when \texttt{and} reaches the EX stage and
 attempts to read \texttt{x5}, the \texttt{addi} instruction may still be in the
 MEM stage, meaning the updated value of \texttt{x5} has not yet
-been written back to the register file.
+been written back to the register file. During the 5th cycle, the \texttt{addi} instruction is in the MEM stage, and needs to forward its data to the \texttt{and} instruction in the \textbf{EX stage}. Notice in fig. \ref{haz1}, both the the forward signals get asserted when rs1\_E = rd\_M = rs2\_E.
 
 Similarly, considering the following code snippet:
 \begin{lstlisting}[language=RISCV]
@@ -174,7 +184,15 @@ Similarly, considering the following code snippet:
     and x6 x5 x5 
     # x6 = 5 if works, otherwise x6 = 0
 \end{lstlisting}
-Again, here, when \texttt{and} reaches the EX stage, \texttt{x5} is still in the
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{figures/haz_test_2.png}
+    \caption{WB-EX Forwarding}
+    \label{haz2}
+\end{figure}
+
+Again, here, when \texttt{and} reaches the EX stage on cycle 5, \texttt{x5} is still in the
 WB stage - when it has to be reached to EX for the \texttt{and} to execute
 correctly.
 
@@ -207,11 +225,18 @@ simultaneously. Consider the following assembly code as an example.
     and x6 x5 x5 
 \end{lstlisting}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{figures/haz_test_3.png}
+    \caption{Priority during simultaneous forwarding cases}
+    \label{haz3}
+\end{figure}
+
 In the example from above, it is important that the \textbf{more recent result
     be given priority.} If MEM-EX forwarding was not given priority, \texttt{x6}'s
-value would've been 5 or 0 - not 6 like it is actually supposed to be by the end of line 2.
+value would've been 5 or 0 - not 6 like it is actually supposed to be by the end of line 2. fig \ref{haz3} shows that in the 5th cycle both \texttt{forward} signals were asserted to \texttt{10} rather than \texttt{01}.
 
-Hence, the code snippet for forwarding looks like the following:
+The code snippet that implements the forwarding looks like this:
 
 \begin{lstlisting}[language=verilog]
 if(((rs1_e == rd_m) && reg_write_m) && 
