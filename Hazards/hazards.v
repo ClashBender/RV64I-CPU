@@ -40,7 +40,11 @@ module hazards(
         // Load-use hazard detection
         // 01 => data memory read and will be written into reg in wb stage. 
         // mem_write_d ensures that it does not trigger for the case of "ld followed by sd", since that case can be resolved with forwarding
+<<<<<<< Updated upstream
         if ((mem_to_reg_e == 2'b01) && (mem_write_d == 1'b0) && (rd_e != 0) && ((rs1_d == rd_e) || (rs2_d == rd_e))) begin 
+=======
+        if ((mem_to_reg_e == 2'b01) && (!mem_write_d) && (rd_e != 0) && ((rs1_d == rd_e) || (rs2_d == rd_e))) begin 
+>>>>>>> Stashed changes
             stall = 1'b1;
         end
         // Control hazard detection (for branches and jal)
