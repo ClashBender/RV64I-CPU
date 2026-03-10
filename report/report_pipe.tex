@@ -278,7 +278,7 @@ Control hazards (also called branch hazards) occur when the pipeline must make
 decisions about instruction flow before determining whether a branch will be
 taken. In a pipelined processor, by the time a branch instruction reaches the
 stage where its condition is evaluated, several subsequent instructions have
-already been fetched into the pipeline. If the branch is taken, these 
+already been fetched into the pipeline. If the branch is taken, these
 speculatively fetched instructions are incorrect and must be discarded.
 
 Consider this example:
