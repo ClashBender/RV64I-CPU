@@ -20,8 +20,8 @@ reg [63:0] registers [31:0];
 assign read_data1 = registers[read_reg1];
 assign read_data2 = registers[read_reg2];
 
-// write operation
-always @(posedge clk or posedge reset) begin
+// write operation — use negedge so writes settle before the next posedge read
+always @(negedge clk or posedge reset) begin
     if (reset) begin
         for (integer i = 0; i < 32; i = i + 1) 
             registers[i] <= 64'b0;

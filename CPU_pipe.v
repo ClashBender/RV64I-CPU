@@ -8,8 +8,6 @@
 `include "5-Writeback/writeback.v"
 `include "Hazards/hazards.v"
 
-
-
 module CPU_pipe(
     input clk, 
     input reset
@@ -94,7 +92,7 @@ fetch IF_stage(
     .enable(!stall),
     .pc_tar_E(pc_tar_E), // from EX stage
     .PCSrc_E(PCSrc_E), // from EX stage
-    //outputs
+    .pc_out_F(pc_out_F),
     .pc_plus_4_F(pc_plus_4_F), // to ID stage
     .instr_F(instr_F) // to ID stage
 );
@@ -166,12 +164,14 @@ execute EX_stage(
     .ALUSrc_E(ALUSrc_E),
     .rs1_data_E(rs1_data_E), .rs2_data_E(rs2_data_E),
     .rs1_E(rs1_E), .rs2_E(rs2_E), .rd_E(rd_E),
-    .imm_E(imm_E),
+    .imm_E(imm_E), 
+    .pc_out_E(pc_out_E),
     .forwardA_E(forwardA_E), .forwardB_E(forwardB_E),
     .result_W(result_W), .alu_res_M(alu_res_M),
 
     //output
-    .pc_tar_E(pc_tar_E), .alu_res_E(alu_res_E), .write_data_E(write_data_E)
+    .pc_tar_E(pc_tar_E), .alu_res_E(alu_res_E), .write_data_E(write_data_E),
+    .PCSrc_E(PCSrc_E)
 );
 
 

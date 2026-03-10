@@ -20,19 +20,19 @@ module execute(
     input [63:0] imm_E,
 
     // pc values lmfao (done in top module)
-    input [63:0] pc_E, pc_plus_4_E,
+    input [63:0] pc_out_E,
 
     // forwarding inputs 
     input [1:0] forwardA_E,forwardB_E,
     // from WB stage 
-    input [63:0] result_W,alu_res_M,
+    input [63:0] result_W, alu_res_M,
     // control outputs (done in top module)
     // output RegWrite_E, MemWrite_E, MemRead_E,
     // output [1:0] MemToReg_E,
 
     // alu output
-    output [63:0] alu_res_E, write_data_E,pc_tar_E
-    
+    output [63:0] alu_res_E, write_data_E,pc_tar_E,
+    output PCSrc_E
     //(done in top module)
     // output [63:0] pc_plus_4_E,
 
@@ -78,15 +78,17 @@ end
 
     // adder
 
-    adder64 imm_adder(
-        .a(pc_E), .b(imm_E),
-        .adder_op(1'b0),
-        .result(pc_tar_E),
-        .cout(),
-        .carry_flag(),
-        .overflow_flag(),
-        .neg_flag()
-    );
+    assign pc_tar_E = pc_out_E + imm_E;
+
+    // adder64 imm_adder(
+    //     .a(pc_out_E), .b(imm_E),
+    //     .adder_op(1'b0),
+    //     .result(pc_tar_E),
+    //     .cout(),
+    //     .carry_flag(),
+    //     .overflow_flag(),
+    //     .neg_flag()
+    // );
 
     // ALU
     alu_64_bit A7(
@@ -98,9 +100,12 @@ end
     );
 
     assign write_data_E = temp_b;
+
     // detecting jump and branch
-    wire temp;
-    and A1(temp,zero_E,Branch_E);
-    or A2(PCSrc_E,temp,Jump_E);
+    assign PCSrc_E = Jump_E | (zero_E & Branch_E);
+    
+    // wire temp;
+    // and A1(temp,zero_E,Branch_E);
+    // or A2(PCSrc_E,temp,Jump_E);
 endmodule
 `endif

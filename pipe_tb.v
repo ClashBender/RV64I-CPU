@@ -8,21 +8,24 @@ module pipe_tb ();
     reg reset;
 
     integer i;
-    integer cycle_count =0;
+    integer cycle_count = 0;
     integer reg_log;
     integer reg_file;
     integer data_log;
-
     CPU_pipe uut (
         .clk(clk), .reset(reset)
     );
 
+    integer control = 1;
     initial begin
         clk = 0;
         reset = 1;
 
         // Load instructions into instruction memory
-        $readmemh("Testcases/simple.txt", uut.IF_stage.instr_memory.byte_mem);
+        if(control == 0)
+            $readmemh("Testcases/instructions.txt", uut.IF_stage.instr_memory.byte_mem);
+        else if (control == 1)
+            $readmemh("instructions.txt", uut.IF_stage.instr_memory.byte_mem);
 
         $display("\nLoaded instructions into instruction memory\n");
 
@@ -37,42 +40,19 @@ module pipe_tb ();
 
         $display("Starting program\n");
     
-        #10; // hold reset for 10ns
+        #10; // hold reset
         reset = 0;
 
     end
 
-    integer finished = 0;
-
     always #5 begin
         clk = ~clk; // 10ns clock period
         if(clk == 1'b1) begin
-            if (reset) begin
-                finished = 0;
-            end
-            else begin
-                cycle_count = cycle_count + 1;
-
-                if (uut.IF_stage.instr_F == 32'b0) begin
-                    finished = finished + 1;
-                end
-                else begin
-                    finished = 0;
-                end
-            end
-
-        $display("clock %0d: forwardA_E %0d \n", cycle_count,  uut.forwardA_E);
-        $display("clock %0d: forwardB_E %0d \n", cycle_count,  uut.forwardB_E);
-        $display("clock %0d: reg_write_M %0d \n", cycle_count,  uut.RegWrite_M);
-        $display("clock %0d: rs1_E %0d \n", cycle_count,  uut.rs1_E);
-        $display("clock %0d: rs2_E %0d \n", cycle_count,  uut.rs2_E);
-        $display("clock %0d: rd_M %0d \n", cycle_count,  uut.rd_M);
-
+            cycle_count = cycle_count + 1;
         end
-        // ((rs2_e == rd_m) && reg_write_m) && (rs2_e != 0)
-        if (finished >= 4) begin
-            #1; // let posedge clk logic in CPU settle before reading registers
-            
+        
+        if(uut.IF_stage.instr_F == 32'b0) begin
+
             // Write register and data memory values to respective logs, and to register_file.txt
             reg_log = $fopen("logs/register.txt", "w");
             reg_file = $fopen("register_file.txt", "w");

@@ -22,7 +22,7 @@ module seq_tb ();
         reset = 1;
         
         // Load instructions into instruction memory
-        $readmemh("Testcases/simple.txt", uut.A2.byte_mem);
+        $readmemh("Testcases/instructions.txt", uut.A2.byte_mem);
 
         $display("\nLoaded instructions into instruction memory\n");
 
