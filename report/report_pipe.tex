@@ -278,7 +278,7 @@ Control hazards (also called branch hazards) occur when the pipeline must make
 decisions about instruction flow before determining whether a branch will be
 taken. In a pipelined processor, by the time a branch instruction reaches the
 stage where its condition is evaluated, several subsequent instructions have
-already been fetched into the pipeline. If the branch is taken, these
+already been fetched into the pipeline. If the branch is taken, these 
 speculatively fetched instructions are incorrect and must be discarded.
 
 Consider this example:
@@ -290,68 +290,17 @@ target:
     or x9, x10, x11       # Branch target
 \end{lstlisting}
 
-When \texttt{beq} enters the pipeline, the processor immediately fetches
-\texttt{add} and \texttt{sub} in subsequent cycles. However, if the branch is
-taken (x1 equals x2), those instructions are incorrect and the pipeline must be
-flushed and restarted from \texttt{target}.
-
-The most common type of branch prediction that requires minimal hardware is to
-just assume that the \textbf{branch will not be taken.} This is pretty good on
-its own - however, it fails miserably when loops come into picture. Hence, we're
-using a 2-bit dynamic branch predictor - this helps us predict branches with
-almost 90\% accuracy.
-
-\subsubsection{2-Bit Dynamic Branch Prediction}
-
-To minimize the performance impact of control hazards, we implement a
-\textbf{2-bit dynamic branch predictor}. This predictor maintains a small
-table (Branch History Table or BHT) indexed by the lower bits of the branch
-instruction's PC. Each entry stores a 2-bit saturating counter representing one
-of four prediction states:
-
-\begin{itemize}
-    \item \textbf{Strongly Not Taken (00):} Predict branch will not be taken
-    \item \textbf{Weakly Not Taken (01):} Predict branch will not be taken, but
-          less confident
-    \item \textbf{Weakly Taken (10):} Predict branch will be taken, but less
-          confident
-    \item \textbf{Strongly Taken (11):} Predict branch will be taken
-\end{itemize}
-
-The state machine transitions based on the actual branch outcome:
-\begin{itemize}
-    \item When a branch is \textbf{taken}, the counter increments (saturates at 11)
-    \item When a branch is \textbf{not taken}, the counter decrements (saturates
-          at 00)
-\end{itemize}
-
-The key advantage of the 2-bit predictor over a simpler 1-bit predictor is
-\textbf{tolerance to one-time branch behavior changes}. For example, a loop
-branch that is taken 99 times and not taken once (to exit the loop) will only
-mispredict twice with a 2-bit predictor: once when entering the loop and once
-when exiting. A 1-bit predictor would mispredict on every loop iteration.
-
-\subsubsection{Branch Misprediction Recovery}
-
-When the branch condition is evaluated in the Execute stage and the actual
-outcome differs from the prediction:
-
-\begin{enumerate}
-    \item The predictor's state is updated based on the actual outcome
-    \item All instructions fetched after the branch (in IF and ID stages) are
-          \textbf{flushed} by converting them to NOPs
-    \item The PC is corrected to either the branch target (if taken) or the
-          sequential instruction (if not taken)
-    \item The pipeline continues from the correct address
-\end{enumerate}
-
-The cost of a misprediction is typically 2--3 cycles (depending on when the
-branch is resolved), compared to always stalling for every branch, which would
-incur the penalty on every branch instruction regardless of the outcome.
-
-Our implementation maintains high prediction accuracy for programs with regular
-branch patterns (loops, frequently taken or not-taken branches), significantly
-reducing the average branch penalty compared to static prediction schemes.
+\subsubsection{Static Branch Prediction}
+Static branch prediction is a simple technique that predicts the outcome of a
+branch instruction without using any type of runtime history. It is called
+static because the prediction is always the same irrespective of the assembly
+code. After execution of the branch instruction, if the prediction was correct,
+the pipeline continues without interruption. However, if the prediction was
+incorrect (i.e., the branch is taken when we predicted not taken), the pipeline
+must flush all instructions that were fetched after the branch and fetch the
+correct instructions from the branch target address. This flushing process
+incurs a performance penalty, as it wastes cycles on instructions that will not
+be executed.
 
 \section{Implementation Details}
 
