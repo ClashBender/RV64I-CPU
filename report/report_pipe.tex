@@ -153,17 +153,30 @@ The textbook \textit{Computer Organization And Design}
     \item[2a.] MEM/WB.RegisterRd = ID/EX.RegisterRs1
     \item[2b.] MEM/WB.RegisterRd = ID/EX.RegisterRs2
 \end{itemize}
-Consider the following instruction sequence:
 
-\begin{verbatim}
-    add x5, x1, x2    # x5 = x1 + x2
-    sub x6, x5, x3    # x6 = x5 - x3 
-\end{verbatim}
-
-Without hazard handling, when \texttt{sub} reaches the EX stage and
-attempts to read \texttt{x5}, the \texttt{add} instruction may still be in the
-MEM or WB stage, meaning the updated value of \texttt{x5} has not yet
+Mentioned below are two types of RAW hazards that can be solved by forwarding.
+\begin{lstlisting}[language=RISCV]
+    # 1. mem->ex data hazard
+    addi x5 x0 5
+    and x6 x5 x5 
+    # x6 = 5 if works, otherwise x6 = 0
+\end{lstlisting}
+Without hazard handling, when \texttt{and} reaches the EX stage and
+attempts to read \texttt{x5}, the \texttt{addi} instruction may still be in the
+MEM stage, meaning the updated value of \texttt{x5} has not yet
 been written back to the register file.
+
+Similarly, considering the following code snippet:
+\begin{lstlisting}[language=RISCV]
+    # 2. wb->ex data hazard
+    addi x5 x0 5
+    addi x0 x0 0
+    and x6 x5 x5 
+    # x6 = 5 if works, otherwise x6 = 0
+\end{lstlisting}
+Again, here, when \texttt{and} reaches the EX stage, \texttt{x5} is still in the
+WB stage - when it has to be reached to EX for the \texttt{and} to execute
+correctly.
 
 We can fix these problems by \textbf{forwarding the data}. The forwarding
 unit compares the source registers of the instruction in the EX stage
@@ -184,11 +197,21 @@ Two forwarding select signals are generated:
     \item \textbf{ForwardB:} Controls which value feeds ALU input B. (same encoding)
 \end{itemize}
 
-Note that when comparing register addresses, both forwarding paths activity, we
-give priority to the value in MEM rather than WB because it contains the more
-recent result.
+Note that when comparing register addresses, both forwarding paths may be active
+simultaneously. Consider the following assembly code as an example.
 
-Hence, the code snippet looks like the following:
+\begin{lstlisting}[language=RISCV]
+    # Prioritzing mem->ex over wb->ex test
+    addi x5 x0 5
+    addi x5 x5 1 # x5 = 6
+    and x6 x5 x5 
+\end{lstlisting}
+
+In the example from above, it is important that the \textbf{more recent result
+    be given priority.} If MEM-EX forwarding was not given priority, \texttt{x6}'s
+value would've been 5 or 0 - not 6 like it is actually supposed to be by the end of line 2.
+
+Hence, the code snippet for forwarding looks like the following:
 
 \begin{lstlisting}[language=verilog]
 if(((rs1_e == rd_m) && reg_write_m) && 
@@ -204,23 +227,36 @@ if(((rs1_e == rd_m) && reg_write_m) &&
 Of course, the same follows for \texttt{rs2} and \texttt{forward\_be}.
 
 \begin{tcolorbox}
-    \textbf{A Note on Load-to-Store Forwarding}
+    \textbf{Bonus: About Load-to-Store Forwarding}
 
     An important special case occurs when a load instruction is immediately
     followed by a store instruction that uses the loaded value:
 
     \begin{lstlisting}[language=RISCV]
-ld x5, 0(x1)    # Load x5 from memory
-sd x5, 8(x2)    # Store x5 to different address in memory
+# wb->mem forwarding test
+addi x5 x0 8
+sd x5 0(x0) # mem[0] = 8
+ld x6 0(x0) 
+# x6 = 8 if works, otherwise x6 = 0
 \end{lstlisting}
 
-    In this scenario, the store instruction in the Memory stage needs the
-    value from \texttt{x5} as its write data. Since the load result becomes
-    available at the end of the Memory stage (or from the MEM/WB pipeline
+    In this scenario, the store instruction in the MEM stage needs the value
+    from register \texttt{x5} as its write data. Since the load result becomes
+    available at the end of the MEM stage (or from the MEM/WB pipeline
     register), we implement a forwarding path that routes the loaded data
     directly to the store's write data input.
 
-    This eliminates the need for the data to first pass through the Writeback stage and register file, allowing back-to-back load-store operations without stalling.
+    The following code snippet shows how we fixed this issue.
+
+    \begin{lstlisting}[language=verilog]
+// ld -> sd forwarding
+if(((rd_w == rs2_m) && reg_write_w && mem_write_m) && (rs2_m != 0))
+    forward_m = 1'b1;
+\end{lstlisting}
+
+    This eliminates the need for the data to first pass through the Writeback
+    stage and register file, allowing back-to-back load-store operations without
+    stalling.
 \end{tcolorbox}
 
 This forwarding mechanism eliminates most RAW hazards without
@@ -242,32 +278,28 @@ the MEM stage, but the \texttt{add} instruction needs it at the beginning of
 the EX stage—one cycle too early. Forwarding paths exist, but the data
 simply isn't ready yet.
 
-To fix this, we used a \textbf{Hazard Detection Unit} that identifies load-use
-hazards by checking:
-\begin{itemize}
-    \item If the instruction in the EX stage is a load (\texttt{MemRead\_E = 1})
-    \item If its destination register (\texttt{rd\_E}) matches either source
-          register of the instruction in the ID stage (\texttt{rs1\_D} or
-          \texttt{rs2\_D})
-\end{itemize}
+To fix this, we introduced stall and flush signals to temporarily disable/clear
+the registers - this lets us introduce "bubbles" into the pipeline that let the
+load instruction execute in MEM before the next instruction reaches EX - then
+the MEM-EX forwarding path can be utilized. Hence:
 
-When a load-use hazard is detected, the control unit:
-\begin{enumerate}
-    \item Stalls the IF and ID stages for one cycle
-    \item Inserts a \texttt{NOP} (bubble) into the EX stage by clearing all
-          control signals
-    \item After the one-cycle stall, normal forwarding can supply the loaded data
-          from the MEM stage
-\end{enumerate}
-
-The code looks as follows.
 \begin{lstlisting}[language=verilog]
-assign lw_stall = mem_to_reg_e[0] & 
-                  (rd_e != 0) && 
-                  ((rs1_d == rd_e) || (rs2_d == rd_e));      
-assign stall_d = lw_stall;
-assign stall_f = lw_stall;
+always @ (*) begin
+    stall = 1'b0;
+    flush = 1'b0;
+    if ((mem_to_reg_e == 2'b01) && (mem_write_d == 1'b0) && (rd_e != 0) && ((rs1_d == rd_e) || (rs2_d == rd_e))) begin 
+        stall = 1'b1;
+    end
+    // Control hazard detection (for beq and jal)
+    else if (PCSrc_E) begin //pc_src_mem = (zero_flag & branch_signal) | jump
+        flush = 1'b1;
+    end
+end
 \end{lstlisting}
+
+Note that we check if \texttt{mem\_write\_d == 1'b0}, so that we don't
+accidentally stall the pipeline for a load-store data hazard as we discussed
+earlier.
 
 This single-cycle penalty is unavoidable for load-use hazards but minimizes
 performance impact compared to more conservative stalling strategies.
@@ -278,7 +310,7 @@ Control hazards (also called branch hazards) occur when the pipeline must make
 decisions about instruction flow before determining whether a branch will be
 taken. In a pipelined processor, by the time a branch instruction reaches the
 stage where its condition is evaluated, several subsequent instructions have
-already been fetched into the pipeline. If the branch is taken, these 
+already been fetched into the pipeline. If the branch is taken, these
 speculatively fetched instructions are incorrect and must be discarded.
 
 Consider this example:
