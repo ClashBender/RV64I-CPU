@@ -24,14 +24,14 @@ module pipe_tb ();
         $dumpfile("pipe_tb.vcd");
         $dumpvars(0, pipe_tb);
 
-        for (k = 0; k < 32; k = k + 1) begin
-            $dumpvars(0, uut.ID_stage.reg_inst.registers[k]);
-        end
+        // for (k = 0; k < 32; k = k + 1) begin
+        //     $dumpvars(0, uut.ID_stage.reg_inst.registers[k]);
+        // end
 
 
         // Load instructions into instruction memory
         if(control == 0)
-            $readmemh("Testcases/haz_test_1.txt", uut.IF_stage.instr_memory.byte_mem);
+            $readmemh("Testcases/haz_test_3.txt", uut.IF_stage.instr_memory.byte_mem);
         else if (control == 1)
             $readmemh("instructions.txt", uut.IF_stage.instr_memory.byte_mem);
 
