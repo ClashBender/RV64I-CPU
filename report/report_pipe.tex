@@ -5,6 +5,7 @@
 \usepackage{graphicx}
 \usepackage{textcomp}
 \usepackage{wrapfig}
+\usepackage{float}
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{enumitem}
@@ -161,10 +162,19 @@ Mentioned below are two types of RAW hazards that can be solved by forwarding.
     and x6 x5 x5 
     # x6 = 5 if works, otherwise x6 = 0
 \end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/haz_test_1.png}
+    \caption{mem -\>ex data hazard}
+    \label{haz1}
+\end{figure}
+
+
 Without hazard handling, when \texttt{and} reaches the EX stage and
 attempts to read \texttt{x5}, the \texttt{addi} instruction may still be in the
 MEM stage, meaning the updated value of \texttt{x5} has not yet
-been written back to the register file.
+been written back to the register file. During the 5th cycle, the \texttt{addi} instruction is in the MEM stage, and needs to forward its data to the \texttt{and} instruction in the \textbf{EX stage}. Notice in fig. \ref{haz1}, both the the forward signals get asserted when rs1\_E = rd\_M = rs2\_E.
 
 Similarly, considering the following code snippet:
 \begin{lstlisting}[language=RISCV]
@@ -174,7 +184,15 @@ Similarly, considering the following code snippet:
     and x6 x5 x5 
     # x6 = 5 if works, otherwise x6 = 0
 \end{lstlisting}
-Again, here, when \texttt{and} reaches the EX stage, \texttt{x5} is still in the
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{figures/haz_test_2.png}
+    \caption{WB-EX Forwarding}
+    \label{haz2}
+\end{figure}
+
+Again, here, when \texttt{and} reaches the EX stage on cycle 5, \texttt{x5} is still in the
 WB stage - when it has to be reached to EX for the \texttt{and} to execute
 correctly.
 
@@ -207,11 +225,18 @@ simultaneously. Consider the following assembly code as an example.
     and x6 x5 x5 
 \end{lstlisting}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{figures/haz_test_3.png}
+    \caption{Priority during simultaneous forwarding cases}
+    \label{haz3}
+\end{figure}
+
 In the example from above, it is important that the \textbf{more recent result
     be given priority.} If MEM-EX forwarding was not given priority, \texttt{x6}'s
-value would've been 5 or 0 - not 6 like it is actually supposed to be by the end of line 2.
+value would've been 5 or 0 - not 6 like it is actually supposed to be by the end of line 2. fig \ref{haz3} shows that in the 5th cycle both \texttt{forward} signals were asserted to \texttt{10} rather than \texttt{01}.
 
-Hence, the code snippet for forwarding looks like the following:
+The code snippet that implements the forwarding looks like this:
 
 \begin{lstlisting}[language=verilog]
 if(((rs1_e == rd_m) && reg_write_m) && 
@@ -245,15 +270,24 @@ instruction that uses the loaded data:
     # x7 = 8 if works, otherwise x7 = 0
 \end{lstlisting}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{figures/haz_test_5.png}
+    \caption{Stalling at cycle 5 to resolve load-use hazard}
+    \label{haz5}
+\end{figure}
+
 The problem is that the data from memory becomes available only at the end of
-the MEM stage, but the \texttt{add} instruction needs it at the beginning of
-the EX stage—one cycle too early. Forwarding paths exist, but the data
+the MEM stage in cycle 5, but the \texttt{addi} instruction needs it at the beginning of
+the EX stage in cycle 4—one cycle too early. Forwarding paths exist, but the data
 simply isn't ready yet.
 
 To fix this, we introduced stall and flush signals to temporarily disable/clear
 the registers - this lets us introduce "bubbles" into the pipeline that let the
 load instruction execute in MEM before the next instruction reaches EX - then
-the MEM-EX forwarding path can be utilized.
+the MEM-EX forwarding path can be utilized. Notice that fig. \ref{haz5} shows how
+\texttt{rs1\_D} and \texttt{rs2\_D} get stalled at cycle 4, and the instruction in the ID stage 
+gets flushed at cycle 5.
 
 Note that we check if \texttt{mem\_write\_d == 1'b0}, so that we don't
 accidentally stall the pipeline for a load-store data hazard as we discussed
@@ -276,7 +310,9 @@ end
 \end{lstlisting}
 
 This single-cycle penalty is unavoidable for load-use hazards but minimizes
-performance impact compared to more conservative stalling strategies.
+performance impact compared to more conservative stalling strategies. An alternative
+solution would be to optimize the compiler algorithm to avoid scheduling instructions 
+that cause load-use hazards back-to-back. However, this is outside the scope of our project.
 
 \begin{tcolorbox}
     \textbf{Bonus: About Load-to-Store Forwarding}
@@ -334,6 +370,34 @@ Consider this example:
 
 \end{lstlisting}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{figures/haz_test_6.png}
+    \caption{Flushing instructions after a taken branch}
+    \label{haz6}
+\end{figure}
+
+Another case where control hazards can occur is with jump instructions like \texttt{jal} 
+and \texttt{jalr}. This has been illustrated by the following assembly code:
+
+\begin{lstlisting}[language=RISCV]
+    # Tests jal instruction and control hazard
+    addi x5 x0 5
+    addi x4 x0 2
+    beq x5 x4 12 # while loop condition
+    addi x4 x0 1 # increments x4 by 1
+    jal x20 -8 # x20 = 12, PC = PC + 20
+    add x6 x5 x4
+\end{lstlisting}
+
+In our project we have implemented the \texttt{jal} instruction, 
+as a BONUS objective and used a similar control hazard handling mechanism for it as well.
+When jump instructions are encountered, \texttt{PCsrc} is asserted, which triggers the flush signal.
+However, an improvement upon this would be to implement a separate jump control signal that is asserted only 
+for jump instructions and additional hardware that computes the jump address in ID stage, 
+so that we don't have to flush the pipeline. This would save 2 clock cycles for each jump.
+This can be done because \texttt{jal} is unconditional, so we don't have to wait for any flags to be set to 
+determine whether the jump will be taken or not. we can just assert the flush signal as soon as we decode a \texttt{jal} instruction.
 
 \subsubsection{Static Branch Prediction}
 Static branch prediction is a simple technique that predicts the outcome of a
@@ -346,6 +410,7 @@ must flush all instructions that were fetched after the branch and fetch the
 correct instructions from the branch target address. This flushing process
 incurs a performance penalty, as it wastes cycles on instructions that will not
 be executed.
+
 
 \section{Implementation Details}
 
