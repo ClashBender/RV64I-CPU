@@ -16,10 +16,13 @@ module pipe_tb ();
         .clk(clk), .reset(reset)
     );
 
-    integer control = 1;
+    integer control = 0;
     initial begin
         clk = 0;
         reset = 1;
+
+        $dumpfile("pipe_tb.vcd");
+        $dumpvars(0, pipe_tb);
 
         // Load instructions into instruction memory
         if(control == 0)
