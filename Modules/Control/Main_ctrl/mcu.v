@@ -41,7 +41,7 @@ module mcu(
                 branch = 1'b1;
                 ALUOp = 2'b01;
             end
-            7'b110z111: begin      // J type
+            7'b110z111: begin      // J type (jal vs jalr)
                 jump = 1'b1;
                 RegWrite = 1'b1;
                 MemToReg = 2'b10;

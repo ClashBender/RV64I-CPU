@@ -13,15 +13,10 @@ module fetch(
     output [31:0] instr_F
 );    
 
-    reg [63:0] next_pc;
+    wire [63:0] next_pc;
+    assign next_pc = (PCSrc_E) ? pc_tar_E : pc_plus_4_F;
 
-    always @(*) begin
-        if (PCSrc_E == 1'b1)
-            next_pc = pc_tar_E;
-        else
-            next_pc = pc_plus_4_F;
-    end
-
+    // buffer
     always @ (posedge clk) begin
         if (reset == 1'b1)
             pc_out_F <= 64'b0;
@@ -29,15 +24,7 @@ module fetch(
             pc_out_F <= next_pc;
     end
     
-    adder64 add_pc_4(
-        .a(pc_out_F), .b(64'h4),
-        .adder_op(1'b0),
-        .result(pc_plus_4_F),
-        .cout(),
-        .carry_flag(),
-        .overflow_flag(),
-        .neg_flag()
-    );
+    assign pc_plus_4_F = pc_out_F + 3'd4;
 
     instmem instr_memory(
         .addr(pc_out_F),
