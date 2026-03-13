@@ -68,7 +68,6 @@ module pipe_tb ();
            
             for (i = 0; i < 1024; i = i + 1) begin
                 if(i<32) begin
-                    //$display("x%0d: %h", i, uut.ID_stage.reg_inst.registers[i]);
                     $fwrite(reg_log, "x%0d: %h\n", i, uut.ID_stage.reg_inst.registers[i]);
                     $fwrite(reg_file, "%h\n", uut.ID_stage.reg_inst.registers[i]);
                 end
