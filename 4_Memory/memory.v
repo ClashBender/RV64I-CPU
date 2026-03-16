@@ -11,21 +11,21 @@ module memory(
     input [1:0] MemToReg_M,
     
     //ALU
-    input [63:0] alu_res_M,write_data_M,
+    input [63:0] alu_res_M, write_data_M,
     input [4:0] rd_M,
     input [63:0] pc_plus_4_M,
 
-    // outputs 
-    // output RegWrite_M,
-    // output [1:0] MemToReg_M,
+    // forwarding
+    input forward_M,
+    input [63:0] read_data_W,
     
-
-    //output [4:0] rd_M,
-    //output [63:0] pc_plus_4_M,
     // data memory
     output [63:0] read_data_M
-    //output [63:0] alu_res_M
 );
+
+wire [63:0] write_data;
+
+assign write_data = (forward_M) ? read_data_W : write_data_M;
 
 data_mem data_mem(
     .clk(clk),
@@ -33,13 +33,10 @@ data_mem data_mem(
     .MemWrite(MemWrite_M),
     .MemRead(MemRead_M),
     .address(alu_res_M[9:0]),       
-    .write_data(write_data_M),
+    .write_data(write_data),
     .read_data(read_data_M)
     ); 
-    //done in top module
-//  assign rd_M = rd_E;
-//  assign alu_res_M = alu_res_E;
-//  assign pc_plus_4_M = pc_plus_4_E;
+
 
 endmodule
 
