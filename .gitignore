@@ -19,4 +19,3 @@ Assembler/asm
 
 # Ignore register and memory logs
 logs/
-register_file.txt

@@ -1,11 +1,10 @@
 # !/bin/bash
 set -e
 
-ASM_SRC="Assembler/assembler.c"     # where the assembler is
-ASM_EXE="Assembler/asm"             # where asm.exe is
+ASM_SRC="tools/assembler/assembler.c"     # where the assembler is
+ASM_EXE="tools/assembler/asm"             # where asm.exe is
 EXIT_MSG="Exiting script."
 
-# Function to quit if q is pressed in console input.
 read_or_quit() {
     
 	local __var_name="$1"
@@ -32,7 +31,10 @@ while true; do
 
 	case "$ASM_INPUT" in
 		*.asm|*.txt)
-			if [ -f "$ASM_INPUT" ]; then
+			if [[ "$ASM_INPUT" != */* ]] && [ -f "testcases/$ASM_INPUT" ]; then
+				ASM_INPUT="testcases/$ASM_INPUT"
+				break
+			elif [ -f "$ASM_INPUT" ]; then
 				break
 			else
 				echo "File not found: $ASM_INPUT"
@@ -47,12 +49,18 @@ while true; do
 done
 
 # Output file destination and name
-INST_OUT="Testcases/$(basename "${ASM_INPUT%.*}").txt" 
+INST_OUT="testcases/$(basename "${ASM_INPUT%.*}").txt" 
+FIXED_OUT="testcases/asm.txt"
 
 # Step 1: Assembling the code
 echo "[1/2] Assembling to machine code..."
 gcc "$ASM_SRC" -o "$ASM_EXE"
 ./"$ASM_EXE" "$ASM_INPUT" -o "$INST_OUT"
+
+# Write to a file asm.txt as well
+if [ "$INST_OUT" != "$FIXED_OUT" ]; then
+	cp "$INST_OUT" "$FIXED_OUT"
+fi
 
 # Step 2: Selecting and running our CPU :)
 while true; do
@@ -64,13 +72,13 @@ while true; do
 	case "$cpu_choice" in
 		1)
 			echo "Running sequential CPU simulation..."
-			iverilog seq_tb.v
+			iverilog src/arch/seq_tb.v
 			vvp ./a.out
 			break
 			;;
 		2)
 			echo "Running pipelined CPU simulation..."
-			iverilog pipe_tb.v
+			iverilog src/arch/pipe_tb.v
 			vvp ./a.out
 			break
 			;;
@@ -79,25 +87,6 @@ while true; do
 			;;
 	esac
 done
-
-# # Step 3: Optionally open GTKWave
-# read_or_quit open_wave "[3/3] Open GTKWave? (y/n): "
-# case "$open_wave" in
-# 	y|Y)
-# 		if [ "$cpu_choice" = "2" ] && [ -f "pipe_tb.vcd" ]; then
-# 			echo "Opening pipe_tb.vcd in GTKWave..."
-# 			gtkwave pipe_tb.vcd &
-# 		elif [ -f "seq_tb.vcd" ]; then
-# 			echo "Opening seq_tb.vcd in GTKWave..."
-# 			gtkwave seq_tb.vcd &
-# 		else
-# 			echo "No VCD file found."
-# 		fi
-# 		;;
-# 	*)
-# 		echo "Skipping GTKWave."
-# 		;;
-# esac
 
 echo ""
 echo "Script executed successfully."
