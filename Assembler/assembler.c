@@ -231,10 +231,6 @@ int main(int argc, char **argv)
             dumpHexToFile(code, fout);
     }
 
-    // Add zeroes at the end of the .txt files
-    for (int i = 0; i < 4; i++)
-        dumpHexToFile(0, fout);
-
     fclose(fin);
     fclose(fout);
     printf("Hex output written to ");

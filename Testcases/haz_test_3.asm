@@ -6,3 +6,4 @@ and x6 x5 x5 # x6 = 6 if works, otherwise x6 = 5 or x6=0
 addi x0 x0 0
 addi x0 x0 0
 addi x0 x0 0
+addi x0 x0 0

@@ -17,6 +17,8 @@ module pipe_tb ();
     );
 
     integer control = 0;
+    parameter MAX_CYCLES = 10000; 
+
     initial begin
         clk = 0;
         reset = 1;
@@ -28,10 +30,18 @@ module pipe_tb ();
         //     $dumpvars(0, uut.ID_stage.reg_inst.registers[k]);
         // end
 
+        // Reset instruction memory
+        for (i = 0; i < `IMEM_SIZE/4; i = i + 1) begin
+            uut.IF_stage.instr_memory.inst_mem[i] = 32'b0;
+            uut.IF_stage.instr_memory.byte_mem[4*i] = 8'b0;
+            uut.IF_stage.instr_memory.byte_mem[4*i+1] = 8'b0;
+            uut.IF_stage.instr_memory.byte_mem[4*i+2] = 8'b0;
+            uut.IF_stage.instr_memory.byte_mem[4*i+3] = 8'b0;
+        end
 
         // Load instructions into instruction memory
         if(control == 0)
-            $readmemh("Testcases/haz_test_3.txt", uut.IF_stage.instr_memory.byte_mem);
+            $readmemh("Testcases/failure.txt", uut.IF_stage.instr_memory.byte_mem);
         else if (control == 1)
             $readmemh("instructions.txt", uut.IF_stage.instr_memory.byte_mem);
 
@@ -57,6 +67,12 @@ module pipe_tb ();
         clk = ~clk; // 10ns clock period
         if(clk == 1'b1) begin
             cycle_count = cycle_count + 1;
+            
+            // Safety timeout
+            if(cycle_count > MAX_CYCLES) begin
+                $display("ERROR: Simulation exceeded %d cycles. Possible infinite loop.", MAX_CYCLES);
+                $finish;
+            end
         end
         
         if(uut.IF_stage.instr_F == 32'b0) begin
@@ -65,7 +81,9 @@ module pipe_tb ();
             reg_log = $fopen("logs/register.txt", "w");
             reg_file = $fopen("register_file.txt", "w");
             data_log = $fopen("logs/data_memory.txt", "w");
-           
+            
+            $fwrite(data_log, "%0d: ", 0);
+
             for (i = 0; i < 1024; i = i + 1) begin
                 if(i<32) begin
                     $fwrite(reg_log, "x%0d: %h\n", i, uut.ID_stage.reg_inst.registers[i]);
@@ -76,9 +94,11 @@ module pipe_tb ();
                     $fwrite(reg_file,"%0d", cycle_count);
                 end
 
-                $fwrite(data_log, "%0d: %h\n", i,  uut.MEM_stage.data_mem.data[i]);
-                // if((i+1)%8 == 0)
-                //     $fwrite(data_log, "\n");
+                $fwrite(data_log, "%h ", uut.MEM_stage.data_mem.data[i]);
+                if((i+1)%8 == 0) begin
+                    $fwrite(data_log, "\n");
+                    $fwrite(data_log, "%0d: ", ((i+1)/8));
+                end
             end
 
             $fclose(reg_log);

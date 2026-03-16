@@ -50,13 +50,13 @@ done
 INST_OUT="Testcases/$(basename "${ASM_INPUT%.*}").txt" 
 
 # Step 1: Assembling the code
-echo "[1/3] Assembling to machine code..."
+echo "[1/2] Assembling to machine code..."
 gcc "$ASM_SRC" -o "$ASM_EXE"
 ./"$ASM_EXE" "$ASM_INPUT" -o "$INST_OUT"
 
 # Step 2: Selecting and running our CPU :)
 while true; do
-	echo "[2/3] Choose CPU simulation mode:"
+	echo "[2/2] Choose CPU simulation mode:"
 	echo "  1) Sequential"
 	echo "  2) Pipelined"
 	read_or_quit cpu_choice "Enter choice (1/2): "
@@ -80,24 +80,24 @@ while true; do
 	esac
 done
 
-# Step 3: Optionally open GTKWave
-read_or_quit open_wave "[3/3] Open GTKWave? (y/n): "
-case "$open_wave" in
-	y|Y)
-		if [ "$cpu_choice" = "2" ] && [ -f "pipe_tb.vcd" ]; then
-			echo "Opening pipe_tb.vcd in GTKWave..."
-			gtkwave pipe_tb.vcd &
-		elif [ -f "seq_tb.vcd" ]; then
-			echo "Opening seq_tb.vcd in GTKWave..."
-			gtkwave seq_tb.vcd &
-		else
-			echo "No VCD file found."
-		fi
-		;;
-	*)
-		echo "Skipping GTKWave."
-		;;
-esac
+# # Step 3: Optionally open GTKWave
+# read_or_quit open_wave "[3/3] Open GTKWave? (y/n): "
+# case "$open_wave" in
+# 	y|Y)
+# 		if [ "$cpu_choice" = "2" ] && [ -f "pipe_tb.vcd" ]; then
+# 			echo "Opening pipe_tb.vcd in GTKWave..."
+# 			gtkwave pipe_tb.vcd &
+# 		elif [ -f "seq_tb.vcd" ]; then
+# 			echo "Opening seq_tb.vcd in GTKWave..."
+# 			gtkwave seq_tb.vcd &
+# 		else
+# 			echo "No VCD file found."
+# 		fi
+# 		;;
+# 	*)
+# 		echo "Skipping GTKWave."
+# 		;;
+# esac
 
 echo ""
 echo "Script executed successfully."

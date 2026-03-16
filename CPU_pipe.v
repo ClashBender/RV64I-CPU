@@ -5,7 +5,7 @@
 `include "2_Decode/decode.v"
 `include "3_Execute/execute.v"
 `include "4_Memory/memory.v"
-`include "5-Writeback/writeback.v"
+`include "5_Writeback/writeback.v"
 `include "Hazards/hazards.v"
 
 module CPU_pipe(
@@ -203,6 +203,8 @@ memory MEM_stage(
     .alu_res_M(alu_res_M), 
     .write_data_M(write_data_M), .rd_M(rd_M), 
     .pc_plus_4_M(pc_plus_4_M),
+    .forward_M(forward_M),
+    .read_data_W(read_data_W),
     .read_data_M(read_data_M)
 );
 

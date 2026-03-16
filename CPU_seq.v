@@ -90,7 +90,10 @@ alu_64_bit A7(
     .rs2(in2),
     .alu_ctrl(ALU_ctrl),
     .result(alu_res),
-    .zero_flag(zero)  
+    .zero_flag(zero),  
+    .carry_flag(),
+    .overflow_flag(),
+    .cout()
     );
 
 data_mem A8(
@@ -140,6 +143,7 @@ adder64 increment_by_4(
     .overflow_flag(),
     .neg_flag()
     );
+    
 // writing Back
 assign write_data = (MemToReg == 2'b01) ? out : (MemToReg==2'b10) ? incremented_mem_addr : alu_res; // if MemToReg = 00, write alu_res, if MemToReg = 01, write out, if MemToReg = 10, write incremented_mem_addr
 
