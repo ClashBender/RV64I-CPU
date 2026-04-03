@@ -1,14 +1,14 @@
 module classifyFD(
     input mode, // 0 for FP32, 1 for FP64
     input [63:0] a,
-    output reg [9:0] classify,
-    output nan, inf, zero, subn, normal
+    output reg [9:0] classify, //this follows the IEEE 754-2008 standard for classifying floating point numbers
+    output reg nan, inf, zero, subn, normal
 );
 
 always @(*) begin
     
     if(mode) begin
-        if(a[62:52] == 11'hfff) begin // Exponent all 1s
+        if(a[62:52] == 11'h7ff) begin // Exponent all 1s
             if(a[51:0] == 0) 
                 classify = a[63] ? 10'b00_0000_0001 : 10'b00_1000_0000; // Infinity
             else if(a[51] == 1) 
