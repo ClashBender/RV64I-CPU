@@ -10,8 +10,8 @@ module multiplyFD (
 );
 
 reg sign;
-reg [9:0] exponentF; //need to account for exponent overflow when adding and the sign.
-reg [12:0] exponentD; //need to account for exponent overflow when adding and the sign.
+reg signed [9:0] exponentF; //need to account for exponent overflow when adding and the sign.
+reg signed [12:0] exponentD; //need to account for exponent overflow when adding and the sign.
 reg [47:0] mantissaF; // both a and b are written as 1.mantissa, so 24 bits each, total 48 bits after multiplication
 reg [105:0] mantissaD; // both a and b are written as 1.mantissa, so 53 bits each, total 106 bits after multiplication
 
@@ -27,7 +27,7 @@ always @(*) begin
             result = (zeroA || zeroB) ? {sign, 11'h7ff, 1'b1, 51'b0} : {sign, 11'h7ff, 52'd0}; // sNaN or infinity
         end
         else if (zeroA || zeroB || (subnA && subnB)) begin
-            result = 0; // zero or both subnormals
+            result = {sign, 63'd0}; // zero or both subnormals
         end
         else begin //cases with atleast one normal
 
@@ -74,7 +74,7 @@ always @(*) begin
             result = (zeroA || zeroB) ? {32'd0,sign, 8'hff, 1'b1, 23'd0} : {32'd0, sign, 8'hff, 23'd0}; // sNaN or infinity
         end
         else if (zeroA || zeroB || (subnA && subnB)) begin
-            result = 0; // zero or both subnormals
+            result = {32'd0, sign, 31'd0}; // zero or both subnormals
         end
         else begin //cases with atleast one normal
 
